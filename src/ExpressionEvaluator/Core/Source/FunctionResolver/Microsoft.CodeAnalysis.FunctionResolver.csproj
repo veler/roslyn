@@ -7,11 +7,9 @@
     <AssemblyName>Microsoft.CodeAnalysis.ExpressionEvaluator.FunctionResolver</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <IsSymbolPublishingPackage>true</IsSymbolPublishingPackage>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\..\Compilers\Core\Portable\InternalUtilities\ExceptionUtilities.cs">
-      <Link>Compiler\ExceptionUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\..\..\..\Compilers\Core\Portable\MetadataReader\MetadataTypeCodeExtensions.cs">
       <Link>Compiler\MetadataTypeCodeExtensions.cs</Link>
     </Compile>
@@ -21,8 +19,8 @@
     <Compile Include="..\..\..\..\Compilers\Core\Portable\Symbols\WellKnownMemberNames.cs">
       <Link>Compiler\WellKnownMemberNames.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Compilers\Core\Portable\InternalUtilities\NullableAttributes.cs">
-      <Link>Compiler\NullableAttributes.cs</Link>
+    <Compile Include="..\..\..\..\Compilers\Core\Portable\Symbols\CommonGeneratedNames.cs">
+      <Link>Compiler\CommonGeneratedNames.cs</Link>
     </Compile>
     <Compile Include="..\..\..\..\Compilers\Core\Portable\InternalUtilities\RoslynString.cs">
       <Link>Compiler\RoslynString.cs</Link>
@@ -55,15 +53,11 @@
     <InternalsVisibleTo Include="Microsoft.CodeAnalysis.ExpressionEvaluator.FunctionResolver.UnitTests" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
-    <PackageReference Include="Microsoft.VisualStudio.Debugger.Engine-implementation" Version="$(MicrosoftVisualStudioDebuggerEngineimplementationVersion)" />
-    <PackageReference Include="Microsoft.VisualStudio.Debugger.Metadata-implementation">
-      <Version>$(MicrosoftVisualStudioDebuggerMetadataimplementationVersion)</Version>
-      <ExcludeAssets>compile</ExcludeAssets>
-    </PackageReference>
-    <!-- Remove once https://github.com/dotnet/sdk/issues/19506 is resolved -->
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="$(MicrosoftNETFrameworkReferenceAssembliesVersion)" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Reflection.Metadata" />
+    <PackageReference Include="Microsoft.VisualStudio.Debugger.Engine-implementation" />
+    <PackageReference Include="Microsoft.VisualStudio.Debugger.Metadata-implementation" ExcludeAssets="compile" />
   </ItemGroup>
+  <Import Project="..\..\..\..\Dependencies\Contracts\Microsoft.CodeAnalysis.Contracts.projitems" Label="Shared" />
   <Import Project="$(RepositoryEngineeringDir)targets\Vsdconfig.targets" />
 </Project>

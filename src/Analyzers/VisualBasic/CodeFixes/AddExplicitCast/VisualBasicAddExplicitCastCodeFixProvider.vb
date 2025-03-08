@@ -9,15 +9,11 @@ Imports System.Threading
 Imports Microsoft.CodeAnalysis
 Imports Microsoft.CodeAnalysis.CodeFixes
 Imports Microsoft.CodeAnalysis.CodeFixes.AddExplicitCast
-Imports Microsoft.CodeAnalysis.LanguageServices
-Imports Microsoft.CodeAnalysis.Operations
+Imports Microsoft.CodeAnalysis.LanguageService
 Imports Microsoft.CodeAnalysis.PooledObjects
-Imports Microsoft.CodeAnalysis.Simplification
-Imports Microsoft.CodeAnalysis.VisualBasic.LanguageServices
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 
 Namespace Microsoft.CodeAnalysis.VisualBasic.CodeFixes.AddExplicitCast
-
     <ExportCodeFixProvider(LanguageNames.VisualBasic, Name:=PredefinedCodeFixProviderNames.AddExplicitCast), [Shared]>
     Partial Friend NotInheritable Class VisualBasicAddExplicitCastCodeFixProvider
         Inherits AbstractAddExplicitCastCodeFixProvider(Of ExpressionSyntax)
@@ -32,29 +28,39 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeFixes.AddExplicitCast
         <ImportingConstructor>
         <SuppressMessage("RoslynDiagnosticsReliability", "RS0033:Importing constructor should be [Obsolete]", Justification:="Used in test code: https://github.com/dotnet/roslyn/issues/42814")>
         Public Sub New()
-            MyBase.New(VisualBasicSyntaxFacts.Instance)
-            _fixer = New ArgumentFixer(Me)
+            _fixer = New ArgumentFixer()
         End Sub
 
         Public Overrides ReadOnly Property FixableDiagnosticIds As ImmutableArray(Of String) = ImmutableArray.Create(BC30512, BC42016, BC30518, BC30519)
 
-        Protected Overrides Function ApplyFix(currentRoot As SyntaxNode, targetNode As ExpressionSyntax,
-                conversionType As ITypeSymbol) As SyntaxNode
-            ' TODO:
-            ' the Simplifier doesn't remove the redundant cast from the expression
-            ' Issue link: https : //github.com/dotnet/roslyn/issues/41500
-            Dim castExpression = targetNode.Cast(
-                conversionType, isResultPredefinedCast:=Nothing).WithAdditionalAnnotations(Simplifier.Annotation)
-            Dim newRoot = currentRoot.ReplaceNode(targetNode, castExpression)
-            Return newRoot
+        Protected Overrides Sub GetPartsOfCastOrConversionExpression(
+                expression As ExpressionSyntax,
+                ByRef type As SyntaxNode,
+                ByRef castedExpression As ExpressionSyntax)
+            Dim directCastExpression = TryCast(expression, DirectCastExpressionSyntax)
+            If directCastExpression IsNot Nothing Then
+                type = directCastExpression.Type
+                castedExpression = directCastExpression.Expression
+                Return
+            End If
+
+            Dim conversionExpression = DirectCast(expression, CTypeExpressionSyntax)
+            type = conversionExpression.Type
+            castedExpression = conversionExpression.Expression
+        End Sub
+
+        Protected Overrides Function Cast(expression As ExpressionSyntax, type As ITypeSymbol) As ExpressionSyntax
+            Return expression.Cast(type, isResultPredefinedCast:=Nothing)
         End Function
 
-        Protected Overrides Function TryGetTargetTypeInfo(document As Document, semanticModel As SemanticModel,
-                root As SyntaxNode, diagnosticId As String, spanNode As ExpressionSyntax,
-                cancellationToken As CancellationToken,
-                ByRef potentialConversionTypes As ImmutableArray(Of (ExpressionSyntax, ITypeSymbol))) As Boolean
-            potentialConversionTypes = ImmutableArray(Of (ExpressionSyntax, ITypeSymbol)).Empty
-            Dim mutablePotentialConversionTypes = ArrayBuilder(Of (ExpressionSyntax, ITypeSymbol)).GetInstance()
+        Protected Overrides Sub AddPotentialTargetTypes(
+                document As Document,
+                semanticModel As SemanticModel,
+                root As SyntaxNode,
+                diagnosticId As String,
+                spanNode As ExpressionSyntax,
+                candidates As ArrayBuilder(Of (node As ExpressionSyntax, type As ITypeSymbol)),
+                cancellationToken As CancellationToken)
 
             Select Case diagnosticId
                 Case BC30512, BC42016
@@ -64,33 +70,32 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeFixes.AddExplicitCast
                         Dim argumentList = DirectCast(argument.Parent, ArgumentListSyntax)
                         Dim invocationNode = argumentList.Parent
 
-                        mutablePotentialConversionTypes.AddRange(_fixer.GetPotentialConversionTypes(
-                            semanticModel, root, argument, argumentList, invocationNode, cancellationToken))
+                        candidates.AddRange(_fixer.GetPotentialConversionTypes(
+                            document, semanticModel, root, argument, argumentList, invocationNode, cancellationToken))
                     Else
                         ' spanNode is a right expression in assignment operation
                         Dim inferenceService = document.GetRequiredLanguageService(Of ITypeInferenceService)()
                         Dim conversionType = inferenceService.InferType(semanticModel, spanNode, objectAsDefault:=False,
                             cancellationToken)
-                        mutablePotentialConversionTypes.Add((spanNode, conversionType))
+                        candidates.Add((spanNode, conversionType))
                     End If
                 Case BC30518, BC30519
-                    Dim invocationNode = spanNode.GetAncestors(Of ExpressionSyntax).FirstOrDefault(
-                        Function(node) Not node.ChildNodes.OfType(Of ArgumentListSyntax).IsEmpty())
+                    Dim invocationExpressionNode = spanNode.GetAncestors(Of InvocationExpressionSyntax).FirstOrDefault(
+                        Function(node) node.ArgumentList IsNot Nothing)
+
+                    Dim attributeNode = spanNode.GetAncestors(Of AttributeSyntax).FirstOrDefault(
+                        Function(node) node.ArgumentList IsNot Nothing)
 
                     ' Collect available cast pairs without target argument
-                    mutablePotentialConversionTypes.AddRange(
-                        GetPotentialConversionTypesWithInvocationNode(semanticModel, root, invocationNode, cancellationToken))
+                    If invocationExpressionNode IsNot Nothing Then
+                        candidates.AddRange(
+                            GetPotentialConversionTypesWithInvocationNode(document, semanticModel, root, invocationExpressionNode, cancellationToken))
+                    ElseIf attributeNode IsNot Nothing Then
+                        candidates.AddRange(
+                            GetPotentialConversionTypesWithInvocationNode(document, semanticModel, root, attributeNode, cancellationToken))
+                    End If
             End Select
-
-            ' clear up duplicate types
-            potentialConversionTypes = FilterValidPotentialConversionTypes(semanticModel, mutablePotentialConversionTypes)
-            Return Not potentialConversionTypes.IsEmpty
-        End Function
-
-        Protected Overrides Function ClassifyConversion(semanticModel As SemanticModel,
-                expression As ExpressionSyntax, type As ITypeSymbol) As CommonConversion
-            Return semanticModel.ClassifyConversion(expression, type).ToCommonConversion()
-        End Function
+        End Sub
 
         ''' <summary>
         ''' Find the first argument that need to be cast
@@ -100,11 +105,16 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeFixes.AddExplicitCast
         ''' <returns>
         ''' Return the first argument that need to be cast, could be null if such argument doesn't exist
         ''' </returns>
-        Private Function GetTargetArgument(semanticModel As SemanticModel,
-                parameters As ImmutableArray(Of IParameterSymbol), arguments As SeparatedSyntaxList(Of ArgumentSyntax)) As ArgumentSyntax
+        Private Shared Function GetTargetArgument(
+                document As Document,
+                semanticModel As SemanticModel,
+                parameters As ImmutableArray(Of IParameterSymbol),
+                arguments As SeparatedSyntaxList(Of ArgumentSyntax)) As ArgumentSyntax
             If parameters.Length = 0 Then
                 Return Nothing
             End If
+
+            Dim syntaxFacts = document.GetRequiredLanguageService(Of ISyntaxFactsService)()
 
             For i = 0 To arguments.Count - 1
                 ' Parameter index cannot out of its range, #arguments Is larger than #parameter only if 
@@ -112,7 +122,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeFixes.AddExplicitCast
                 Dim parameterIndex = Math.Min(i, parameters.Length - 1)
 
                 ' If the argument has a name, get the corresponding parameter index
-                Dim argumentName = SyntaxFacts.GetNameForArgument(arguments(i))
+                Dim argumentName = syntaxFacts.GetNameForArgument(arguments(i))
                 If argumentName IsNot String.Empty AndAlso Not FindCorrespondingParameterByName(argumentName, parameters,
                         parameterIndex) Then
                     Return Nothing
@@ -127,14 +137,16 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeFixes.AddExplicitCast
 
                 If parameters(parameterIndex).IsParams Then
                     Dim paramsType = TryCast(parameterType, IArrayTypeSymbol)
-                    Dim conversion = semanticModel.ClassifyConversion(argumentExpression, paramsType.ElementType)
-                    If conversion.Exists AndAlso Not conversion.IsIdentity Then
-                        Return arguments(i)
+                    If paramsType IsNot Nothing Then
+                        Dim conversion = semanticModel.ClassifyConversion(argumentExpression, paramsType.ElementType)
+                        If conversion.Exists AndAlso Not conversion.IsIdentity Then
+                            Return arguments(i)
+                        End If
                     End If
                 End If
 
-                Dim converison = semanticModel.ClassifyConversion(argumentExpression, parameterType)
-                If converison.Exists AndAlso Not converison.IsIdentity Then
+                Dim argumentConversion = semanticModel.ClassifyConversion(argumentExpression, parameterType)
+                If argumentConversion.Exists AndAlso Not argumentConversion.IsIdentity Then
                     Return arguments(i)
                 End If
             Next
@@ -152,7 +164,10 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeFixes.AddExplicitCast
         ''' Return all the available cast pairs, format is (argument expression, potential conversion type)
         ''' </returns>
         Private Function GetPotentialConversionTypesWithInvocationNode(
-                semanticModel As SemanticModel, root As SyntaxNode, invocationNode As SyntaxNode,
+                document As Document,
+                semanticModel As SemanticModel,
+                root As SyntaxNode,
+                invocationNode As SyntaxNode,
                 cancellationToken As CancellationToken) As ImmutableArray(Of (ExpressionSyntax, ITypeSymbol))
             Dim argumentList = invocationNode.ChildNodes.OfType(Of ArgumentListSyntax).FirstOrDefault()
 
@@ -162,14 +177,14 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeFixes.AddExplicitCast
             Dim mutablePotentialConversionTypes = ArrayBuilder(Of (ExpressionSyntax, ITypeSymbol)).GetInstance()
 
             For Each candidateSymbol In candidateSymbols.OfType(Of IMethodSymbol)()
-                Dim targetArgument = GetTargetArgument(semanticModel, candidateSymbol.Parameters, argumentList.Arguments)
+                Dim targetArgument = GetTargetArgument(document, semanticModel, candidateSymbol.Parameters, argumentList.Arguments)
                 If targetArgument Is Nothing Then
                     Continue For
                 End If
 
                 Dim conversionType As ITypeSymbol = Nothing
                 If _fixer.CanArgumentTypesBeConvertedToParameterTypes(
-                        semanticModel, root, argumentList, candidateSymbol.Parameters, targetArgument, cancellationToken, conversionType) Then
+                        document, semanticModel, root, argumentList, candidateSymbol.Parameters, targetArgument, cancellationToken, conversionType) Then
                     mutablePotentialConversionTypes.Add((targetArgument.GetExpression(), conversionType))
                 End If
             Next

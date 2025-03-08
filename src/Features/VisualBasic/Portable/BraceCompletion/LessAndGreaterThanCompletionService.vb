@@ -8,12 +8,11 @@ Imports Microsoft.CodeAnalysis
 Imports Microsoft.CodeAnalysis.BraceCompletion
 Imports Microsoft.CodeAnalysis.Host.Mef
 Imports Microsoft.CodeAnalysis.Text
-Imports Microsoft.CodeAnalysis.VisualBasic
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 
 Namespace Microsoft.CodeAnalysis.VisualBasic.BraceCompletion
-    <Export(LanguageNames.VisualBasic, GetType(IBraceCompletionService)), [Shared]>
-    Friend Class LessAndGreaterThanCompletionService
+    <ExportBraceCompletionService(LanguageNames.VisualBasic), [Shared]>
+    Friend NotInheritable Class LessAndGreaterThanCompletionService
         Inherits AbstractVisualBasicBraceCompletionService
 
         <ImportingConstructor>
@@ -43,8 +42,8 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.BraceCompletion
             Return True
         End Function
 
-        Public Overrides Function AllowOverTypeAsync(context As BraceCompletionContext, cancellationToken As CancellationToken) As Task(Of Boolean)
-            Return AllowOverTypeInUserCodeWithValidClosingTokenAsync(context, cancellationToken)
+        Public Overrides Function AllowOverType(context As BraceCompletionContext, cancellationToken As CancellationToken) As Boolean
+            Return AllowOverTypeInUserCodeWithValidClosingToken(context, cancellationToken)
         End Function
     End Class
 End Namespace

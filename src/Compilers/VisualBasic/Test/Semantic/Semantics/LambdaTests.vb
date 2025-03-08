@@ -4,6 +4,7 @@
 
 Imports Microsoft.CodeAnalysis
 Imports Microsoft.CodeAnalysis.VisualBasic
+Imports Microsoft.CodeAnalysis.VisualBasic.Symbols
 Imports Roslyn.Test.Utilities
 
 Namespace Microsoft.CodeAnalysis.VisualBasic.UnitTests.Semantics
@@ -169,7 +170,6 @@ End Module
             CompilationUtils.AssertTheseDiagnostics(compilation,
 <expected>
 </expected>)
-
 
             CompileAndVerify(compilation, <![CDATA[
 1
@@ -968,7 +968,6 @@ BC30518: Overload resolution failed because no accessible 'M1' can be called wit
 
         End Sub
 
-
         <Fact>
         Public Sub Test11()
 
@@ -1002,7 +1001,6 @@ End Module
 
             Dim compilation = CompilationUtils.CreateCompilationWithMscorlib40AndVBRuntime(compilationDef)
 
-
             CompilationUtils.AssertTheseDiagnostics(compilation,
 <expected>
     <![CDATA[
@@ -1019,7 +1017,6 @@ BC36918: Single-line statement lambdas must include exactly one statement.
 </expected>)
 
         End Sub
-
 
         <Fact>
         Public Sub Test12()
@@ -1476,7 +1473,6 @@ BC36670: Nested sub does not have a signature that is compatible with delegate '
                                      ~~~~~~~~~~~~~~~
 </expected>)
         End Sub
-
 
         <Fact>
         Public Sub Error_BC36625()
@@ -2380,6 +2376,119 @@ End Class
             Dim compilation = CompilationUtils.CreateCompilationWithMscorlib40AndVBRuntime(compilationDef, TestOptions.ReleaseExe)
 
             Dim verifier = CompileAndVerify(compilation, expectedOutput:="22")
+        End Sub
+
+        <WorkItem(64392, "https://github.com/dotnet/roslyn/issues/64392")>
+        <Fact()>
+        Public Sub ReferToFieldWithinLambdaInTypeAttribute_01()
+
+            Dim compilationDef =
+"
+<Display(Function() $""{Name}"")>
+public class Test
+    <Display(Name:=""Name"")>
+    public readonly property Name As String
+end class
+
+public class DisplayAttribute
+    Inherits System.Attribute
+
+    public Sub New()
+    end Sub
+End Class
+"
+            Dim compilation = CompilationUtils.CreateCompilation(compilationDef)
+            compilation.AssertTheseEmitDiagnostics(
+<expected><![CDATA[
+BC30057: Too many arguments to 'Public Sub New()'.
+<Display(Function() $"{Name}")>
+         ~~~~~~~~~~~~~~~~~~~~
+BC30059: Constant expression is required.
+<Display(Function() $"{Name}")>
+         ~~~~~~~~~~~~~~~~~~~~
+BC30661: Field or property 'Name' is not found.
+    <Display(Name:="Name")>
+             ~~~~
+]]></expected>
+            )
+        End Sub
+
+        <WorkItem(64392, "https://github.com/dotnet/roslyn/issues/64392")>
+        <Fact()>
+        Public Sub ReferToFieldWithinLambdaInTypeAttribute_02()
+
+            Dim compilationDef =
+"
+<Display(Function() Name)>
+public class Test
+    <Display(Name:=""Name"")>
+    public readonly property Name As String
+end class
+
+public class DisplayAttribute
+    Inherits System.Attribute
+
+    public Sub New()
+    end Sub
+End Class
+"
+            Dim compilation = CompilationUtils.CreateCompilation(compilationDef)
+            compilation.AssertTheseEmitDiagnostics(
+<expected><![CDATA[
+BC30057: Too many arguments to 'Public Sub New()'.
+<Display(Function() Name)>
+         ~~~~~~~~~~~~~~~
+BC30059: Constant expression is required.
+<Display(Function() Name)>
+         ~~~~~~~~~~~~~~~
+BC30661: Field or property 'Name' is not found.
+    <Display(Name:="Name")>
+             ~~~~
+]]></expected>
+            )
+        End Sub
+
+        <Fact()>
+        Public Sub CompilerLoweringPreserveAttribute_01()
+            Dim source1 = "
+Imports System
+Imports System.Runtime.CompilerServices
+
+<CompilerLoweringPreserve>
+<AttributeUsage(AttributeTargets.Field Or AttributeTargets.Parameter)>
+Public Class Preserve1Attribute
+    Inherits Attribute
+End Class
+
+<CompilerLoweringPreserve>
+<AttributeUsage(AttributeTargets.Parameter)>
+Public Class Preserve2Attribute
+    Inherits Attribute
+End Class
+
+<AttributeUsage(AttributeTargets.Field Or AttributeTargets.Parameter)>
+Public Class Preserve3Attribute
+    Inherits Attribute
+End Class
+"
+            Dim source2 = "
+Class Test1
+    Function M2(<Preserve1,Preserve2,Preserve3> x As Integer) As System.Func(Of Integer)
+        Return Function() x
+    End Function
+End Class
+"
+
+            Dim validate = Sub(m As ModuleSymbol)
+                               AssertEx.SequenceEqual(
+                                   {"Preserve1Attribute"},
+                                   m.GlobalNamespace.GetMember("Test1._Closure$__1-0.$VB$Local_x").GetAttributes().Select(Function(a) a.ToString()))
+                           End Sub
+
+            Dim comp1 = CreateCompilation(
+                {source1, source2, CompilerLoweringPreserveAttributeDefinition},
+                options:=TestOptions.DebugDll.WithMetadataImportOptions(MetadataImportOptions.All))
+            CompileAndVerify(comp1, symbolValidator:=validate).VerifyDiagnostics()
         End Sub
 
     End Class

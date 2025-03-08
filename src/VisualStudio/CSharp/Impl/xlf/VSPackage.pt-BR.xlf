@@ -94,7 +94,7 @@ Detect and offer editor features for JSON strings;
 Use enhanced colors;
 Editor Color Scheme;
 Inheritance Margin;</source>
-        <target state="needs-review-translation">Sublinhar variáveis ​​reatribuídas;
+        <target state="translated">Sublinhar variáveis ​​reatribuídas;
 Exibir dicas embutidas;
 Mostrar diagnósticos para arquivos fechados;
 Colorizar expressões regulares; 
@@ -107,21 +107,24 @@ Sempre use servidores de símbolos padrão para navegação;
 Usando diretivas;
 Coloque as diretivas do sistema primeiro ao classificar os usos;
 Separe usando grupos de diretivas;
-Sugerir usos para tipos em assemblies de referência;
+Sugerir usos para tipos em montagens de referência;
 Sugerir usos para tipos em pacotes NuGet;
 Realçar;
 Realçar referências ao símbolo sob o cursor;
 Realçar palavras-chave relacionadas sob o cursor;
-Esboço;
-Entrar no modo de destaque quando os arquivos são abertos;
+Estrutura de tópicos;
+Entrar no modo de estrutura de tópicos quando os arquivos são abertos;
+Recolher #regions no arquivo aberto;
+Recolher os usos do arquivo aberto;
+Recolher implementações de metadados em arquivo aberto;
 Mostrar separadores de linha de procedimento;
 Mostrar estrutura de tópicos para construções de nível de declaração;
-Mostrar contornos para construções de nível de código;
-Mostrar contornos para comentários e regiões de pré-processador;
+Mostrar estruturas de tópicos para construções de nível de código;
+Mostrar estrutura de tópicos para comentários e regiões de pré-processador;
 Recolher regiões ao recolher definições;
-Desvanecimento; 
-Fade out de usos não utilizados;
-Fade out de código inacessível ;
+Desvanecimento;
+Esmaecer usos não utilizados;
+Esmaecer código inacessível ;
 Guias de estrutura de bloco;
 Mostrar guias para construções de nível de declaração;
 Mostrar guias para construções de nível de código;
@@ -136,7 +139,7 @@ Não colocar ref ou out em estrutura personalizada;
 Implementar Interface ou Classe Abstrata;
 Ao inserir propriedades, eventos e métodos, coloque-os;
 com outros membros do mesmo tipo;
-no final ;
+no final;
 Ao gerar propriedade;
 prefira lançar propriedades;
 prefira propriedades automáticas;
@@ -407,14 +410,34 @@ Mostrar itens de namespaces não importados (experimental);</target>
         <target state="translated">Componentes de C# usados no IDE. Dependendo do seu tipo de projeto e configurações, uma versão diferente do compilador poderá ser usada.</target>
         <note>Help &gt; About</note>
       </trans-unit>
-      <trans-unit id="An_empty_CSharp_script_file">
-        <source>An empty C# script file.</source>
-        <target state="translated">Um arquivo de script C# vazio.</target>
+      <trans-unit id="Always_add_new_line_on_enter">
+        <source>Always add new line on enter</source>
+        <target state="translated">Sempre adicionar uma nova linha ao pressionar enter</target>
         <note />
       </trans-unit>
-      <trans-unit id="Visual_CSharp_Script">
-        <source>Visual C# Script</source>
-        <target state="translated">Script do Visual C#</target>
+      <trans-unit id="Always_include_snippets">
+        <source>Always include snippets</source>
+        <target state="translated">Sempre incluir snippets</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Default">
+        <source>Default</source>
+        <target state="translated">Padrão</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Include_snippets_when_Tab_is_typed_after_an_identifier">
+        <source>Include snippets when Tab is typed after an identifier</source>
+        <target state="translated">Incluir snippets de código quando Tab for digitado após um identificador</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Never_add_new_line_on_enter">
+        <source>Never add new line on enter</source>
+        <target state="translated">Nunca adicionar uma nova linha ao entrar</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Never_include_snippets">
+        <source>Never include snippets</source>
+        <target state="translated">Nunca incluir snippets</target>
         <note />
       </trans-unit>
     </body>

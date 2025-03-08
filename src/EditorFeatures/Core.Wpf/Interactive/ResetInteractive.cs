@@ -12,8 +12,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using InteractiveHost::Microsoft.CodeAnalysis.Interactive;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.VisualStudio.InteractiveWindow;
-using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 using Microsoft.VisualStudio.Utilities;
 using Roslyn.Utilities;
@@ -30,47 +30,46 @@ namespace Microsoft.CodeAnalysis.Interactive
 
         private readonly Func<string, string> _createImport;
 
-        private readonly IEditorOptionsFactoryService _editorOptionsFactoryService;
+        private readonly EditorOptionsService _editorOptionsService;
 
         internal event EventHandler ExecutionCompleted;
 
-        internal ResetInteractive(IEditorOptionsFactoryService editorOptionsFactoryService, Func<string, string> createReference, Func<string, string> createImport)
+        internal ResetInteractive(EditorOptionsService editorOptionsService, Func<string, string> createReference, Func<string, string> createImport)
         {
-            _editorOptionsFactoryService = editorOptionsFactoryService;
+            _editorOptionsService = editorOptionsService;
             _createReference = createReference;
             _createImport = createImport;
         }
 
-        internal Task ExecuteAsync(IInteractiveWindow interactiveWindow, string title)
+        internal async Task ExecuteAsync(IInteractiveWindow interactiveWindow, string title)
         {
             if (GetProjectProperties(out var references, out var referenceSearchPaths, out var sourceSearchPaths, out var projectNamespaces, out var projectDirectory, out var platform))
             {
-                // Now, we're going to do a bunch of async operations.  So create a wait
-                // indicator so the user knows something is happening, and also so they cancel.
-                var uiThreadOperationExecutor = GetUIThreadOperationExecutor();
-                var context = uiThreadOperationExecutor.BeginExecute(title, EditorFeaturesWpfResources.Building_Project, allowCancellation: true, showProgress: false);
+                try
+                {
+                    // Now, we're going to do a bunch of async operations.  So create a wait
+                    // indicator so the user knows something is happening, and also so they cancel.
+                    var uiThreadOperationExecutor = GetUIThreadOperationExecutor();
+                    using var context = uiThreadOperationExecutor.BeginExecute(title, EditorFeaturesWpfResources.Building_Project, allowCancellation: true, showProgress: false);
 
-                var resetInteractiveTask = ResetInteractiveAsync(
-                    interactiveWindow,
-                    references,
-                    referenceSearchPaths,
-                    sourceSearchPaths,
-                    projectNamespaces,
-                    projectDirectory,
-                    platform,
-                    context);
-
-                // Once we're done resetting, dismiss the wait indicator and focus the REPL window.
-                return resetInteractiveTask.SafeContinueWith(
-                    _ =>
-                    {
-                        context.Dispose();
-                        ExecutionCompleted?.Invoke(this, new EventArgs());
-                    },
-                    TaskScheduler.FromCurrentSynchronizationContext());
+                    // We want to come back onto the calling context to dismiss the wait indicator and to notify about
+                    // execution completion.
+                    await ResetInteractiveAsync(
+                        interactiveWindow,
+                        references,
+                        referenceSearchPaths,
+                        sourceSearchPaths,
+                        projectNamespaces,
+                        projectDirectory,
+                        platform,
+                        context).ConfigureAwait(true);
+                }
+                finally
+                {
+                    // Once we're done resetting focus the REPL window.
+                    ExecutionCompleted?.Invoke(this, new EventArgs());
+                }
             }
-
-            return Task.CompletedTask;
         }
 
         private async Task ResetInteractiveAsync(
@@ -110,7 +109,7 @@ namespace Microsoft.CodeAnalysis.Interactive
             // Now send the reference paths we've collected to the repl.
             await evaluator.SetPathsAsync(referenceSearchPaths, sourceSearchPaths, projectDirectory).ConfigureAwait(true);
 
-            var editorOptions = _editorOptionsFactoryService.GetOptions(interactiveWindow.CurrentLanguageBuffer);
+            var editorOptions = _editorOptionsService.Factory.GetOptions(interactiveWindow.CurrentLanguageBuffer);
             var importReferencesCommand = referencePaths.Select(_createReference);
             await interactiveWindow.SubmitAsync(importReferencesCommand).ConfigureAwait(true);
 
@@ -121,7 +120,7 @@ namespace Microsoft.CodeAnalysis.Interactive
 
             if (!string.IsNullOrWhiteSpace(importNamespacesCommand))
             {
-                await interactiveWindow.SubmitAsync(new[] { importNamespacesCommand }).ConfigureAwait(true);
+                await interactiveWindow.SubmitAsync([importNamespacesCommand]).ConfigureAwait(true);
             }
         }
 

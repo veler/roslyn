@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Symbols;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Microsoft.VisualStudio.LanguageServices.CSharp.CodeModel
@@ -26,10 +25,8 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.CodeModel
 
             private static void AppendName(StringBuilder builder, NameSyntax name)
             {
-                if (name.Kind() == SyntaxKind.QualifiedName)
-                {
-                    AppendName(builder, ((QualifiedNameSyntax)name).Left);
-                }
+                if (name is QualifiedNameSyntax qualifiedName)
+                    AppendName(builder, qualifiedName.Left);
 
                 switch (name.Kind())
                 {
@@ -115,7 +112,7 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.CodeModel
                 {
                     if (firstSeen)
                     {
-                        builder.Append(",");
+                        builder.Append(',');
                     }
 
                     if (parameter.Modifiers.Any(SyntaxKind.RefKeyword))
@@ -144,11 +141,11 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.CodeModel
                 var name = "#op_" + kind.ToString();
                 if (name.EndsWith("Keyword", StringComparison.Ordinal))
                 {
-                    name = name.Substring(0, name.Length - 7);
+                    name = name[..^7];
                 }
                 else if (name.EndsWith("Token", StringComparison.Ordinal))
                 {
-                    name = name.Substring(0, name.Length - 5);
+                    name = name[..^5];
                 }
 
                 builder.Append(name);

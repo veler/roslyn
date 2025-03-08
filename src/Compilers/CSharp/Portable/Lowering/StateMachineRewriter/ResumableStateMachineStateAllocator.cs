@@ -5,7 +5,11 @@
 using System;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CodeGen;
+using Microsoft.CodeAnalysis.CSharp.Emit;
+using Microsoft.CodeAnalysis.CSharp.Symbols;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Emit;
+using Roslyn.Utilities;
 
 namespace Microsoft.CodeAnalysis.CSharp
 {
@@ -16,12 +20,12 @@ namespace Microsoft.CodeAnalysis.CSharp
     {
         private readonly VariableSlotAllocator? _slotAllocator;
         private readonly bool _increasing;
-        private readonly int _firstState;
+        private readonly StateMachineState _firstState;
 
         /// <summary>
         /// The number of the next generated resumable state (i.e. state that resumes execution of the state machine after await expression or yield return).
         /// </summary>
-        private int _nextState;
+        private StateMachineState _nextState;
 
 #if DEBUG
         /// <summary>
@@ -34,7 +38,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// </summary>
         private int _matchedStateCount;
 
-        public ResumableStateMachineStateAllocator(VariableSlotAllocator? slotAllocator, int firstState, bool increasing)
+        public ResumableStateMachineStateAllocator(VariableSlotAllocator? slotAllocator, StateMachineState firstState, bool increasing)
         {
             _increasing = increasing;
             _slotAllocator = slotAllocator;
@@ -43,28 +47,28 @@ namespace Microsoft.CodeAnalysis.CSharp
             _nextState = slotAllocator?.GetFirstUnusedStateMachineState(increasing) ?? firstState;
         }
 
-        public int AllocateState(SyntaxNode awaitOrYieldReturnSyntax)
+        public StateMachineState AllocateState(SyntaxNode awaitOrYieldReturnSyntax, AwaitDebugId awaitId)
         {
             Debug.Assert(SyntaxBindingUtilities.BindsToResumableStateMachineState(awaitOrYieldReturnSyntax));
 
             int direction = _increasing ? +1 : -1;
 
-            if (_slotAllocator?.TryGetPreviousStateMachineState(awaitOrYieldReturnSyntax, out var stateNumber) == true)
+            if (_slotAllocator?.TryGetPreviousStateMachineState(awaitOrYieldReturnSyntax, awaitId, out var state) == true)
             {
 #if DEBUG
                 // two states of the new state machine should not match the same state of the previous machine:
-                Debug.Assert(!_matchedStates[stateNumber * direction]);
-                _matchedStates[stateNumber * direction] = true;
+                Debug.Assert(!_matchedStates[(int)state * direction]);
+                _matchedStates[(int)state * direction] = true;
 #endif
                 _matchedStateCount++;
             }
             else
             {
-                stateNumber = _nextState;
+                state = _nextState;
                 _nextState += direction;
             }
 
-            return stateNumber;
+            return state;
         }
 
         /// <summary>
@@ -73,8 +77,10 @@ namespace Microsoft.CodeAnalysis.CSharp
         public bool HasMissingStates
             => _matchedStateCount < Math.Abs((_slotAllocator?.GetFirstUnusedStateMachineState(_increasing) ?? _firstState) - _firstState);
 
-        public BoundStatement? GenerateThrowMissingStateDispatch(SyntheticBoundNodeFactory f, BoundExpression cachedState, string message)
+        public BoundStatement? GenerateThrowMissingStateDispatch(SyntheticBoundNodeFactory f, BoundExpression cachedState, HotReloadExceptionCode errorCode)
         {
+            Debug.Assert(f.ModuleBuilderOpt != null);
+
             if (!HasMissingStates)
             {
                 return null;
@@ -88,8 +94,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                     f.Literal(_firstState)),
                 f.Throw(
                     f.New(
-                        f.WellKnownMethod(WellKnownMember.System_InvalidOperationException__ctorString),
-                        f.StringLiteral(ConstantValue.Create(message)))));
+                        (MethodSymbol)f.ModuleBuilderOpt.GetOrCreateHotReloadExceptionConstructorDefinition(),
+                        f.StringLiteral(ConstantValue.Create(errorCode.GetExceptionMessage())),
+                        f.Literal(errorCode.GetExceptionCodeValue()))));
         }
     }
 }

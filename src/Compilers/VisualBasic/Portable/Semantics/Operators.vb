@@ -214,11 +214,11 @@ Namespace Microsoft.CodeAnalysis.VisualBasic
             End Select
         End Function
 
-        Friend Shared Function TryGetOperatorName(op As BinaryOperatorKind) As String
+        Friend Shared Function TryGetOperatorName(op As BinaryOperatorKind, isChecked As Boolean) As String
 
             Select Case (op And BinaryOperatorKind.OpMask)
                 Case BinaryOperatorKind.Add
-                    Return WellKnownMemberNames.AdditionOperatorName
+                    Return If(isChecked, WellKnownMemberNames.CheckedAdditionOperatorName, WellKnownMemberNames.AdditionOperatorName)
                 Case BinaryOperatorKind.Concatenate
                     Return WellKnownMemberNames.ConcatenateOperatorName
                 Case BinaryOperatorKind.Like
@@ -236,9 +236,9 @@ Namespace Microsoft.CodeAnalysis.VisualBasic
                 Case BinaryOperatorKind.GreaterThan
                     Return WellKnownMemberNames.GreaterThanOperatorName
                 Case BinaryOperatorKind.Subtract
-                    Return WellKnownMemberNames.SubtractionOperatorName
+                    Return If(isChecked, WellKnownMemberNames.CheckedSubtractionOperatorName, WellKnownMemberNames.SubtractionOperatorName)
                 Case BinaryOperatorKind.Multiply
-                    Return WellKnownMemberNames.MultiplyOperatorName
+                    Return If(isChecked, WellKnownMemberNames.CheckedMultiplyOperatorName, WellKnownMemberNames.MultiplyOperatorName)
                 Case BinaryOperatorKind.Power
                     Return WellKnownMemberNames.ExponentOperatorName
                 Case BinaryOperatorKind.Divide
@@ -246,7 +246,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic
                 Case BinaryOperatorKind.Modulo
                     Return WellKnownMemberNames.ModulusOperatorName
                 Case BinaryOperatorKind.IntegerDivide
-                    Return WellKnownMemberNames.IntegerDivisionOperatorName
+                    Return If(isChecked, WellKnownMemberNames.CheckedDivisionOperatorName, WellKnownMemberNames.IntegerDivisionOperatorName)
                 Case BinaryOperatorKind.LeftShift
                     Return WellKnownMemberNames.LeftShiftOperatorName
                 Case BinaryOperatorKind.RightShift
@@ -267,13 +267,13 @@ Namespace Microsoft.CodeAnalysis.VisualBasic
             End Select
         End Function
 
-        Friend Shared Function TryGetOperatorName(op As UnaryOperatorKind) As String
+        Friend Shared Function TryGetOperatorName(op As UnaryOperatorKind, isChecked As Boolean) As String
 
             Select Case (op And UnaryOperatorKind.OpMask)
                 Case UnaryOperatorKind.Plus
                     Return WellKnownMemberNames.UnaryPlusOperatorName
                 Case UnaryOperatorKind.Minus
-                    Return WellKnownMemberNames.UnaryNegationOperatorName
+                    Return If(isChecked, WellKnownMemberNames.CheckedUnaryNegationOperatorName, WellKnownMemberNames.UnaryNegationOperatorName)
                 Case UnaryOperatorKind.Not
                     Return WellKnownMemberNames.OnesComplementOperatorName
                 Case UnaryOperatorKind.Implicit
@@ -2307,7 +2307,6 @@ Done:
             Dim inputType As TypeSymbol = method.Parameters(0).Type
             Dim outputType As TypeSymbol = method.ReturnType
 
-
             If Not suppressViabilityChecks Then
                 If Not IsConversionOperatorViableBasedOnTypesInvolved(method, inputType, outputType, useSiteInfo) Then
                     conversionIn = Nothing
@@ -3165,6 +3164,8 @@ Next_i:
             Dim liftOperators As Boolean = nullableOfT.GetUseSiteInfo().DiagnosticInfo Is Nothing
 
             Dim candidates = ArrayBuilder(Of CandidateAnalysisResult).GetInstance()
+            Dim someCandidatesHaveOverloadResolutionPriority As Boolean = InternalSyntax.Parser.CheckFeatureAvailability(binder.Compilation.LanguageVersion, InternalSyntax.Feature.OverloadResolutionPriority) AndAlso
+                                                                          opSet.Any(Function(candidate) candidate.OverloadResolutionPriority <> 0)
 
             For Each method In opSet
                 Debug.Assert(method.ParameterCount = If(argument2 Is Nothing, 1, 2))
@@ -3190,7 +3191,10 @@ Next_i:
                     Continue For
                 End If
 
-                CombineCandidates(candidates, New CandidateAnalysisResult(New OperatorCandidate(method)), method.ParameterCount, Nothing, useSiteInfo)
+                CombineCandidates(candidates, New CandidateAnalysisResult(New OperatorCandidate(method)), method.ParameterCount,
+                                  argumentNames:=Nothing,
+                                  someCandidatesHaveOverloadResolutionPriority,
+                                  useSiteInfo)
 
                 If liftOperators Then
                     Dim param1 As ParameterSymbol = method.Parameters(0)
@@ -3231,7 +3235,10 @@ Next_i:
                                                                                                   ImmutableArray.Create(param1),
                                                                                                   ImmutableArray.Create(Of ParameterSymbol)(param1, param2)),
                                                                                               returnType)),
-                                          method.ParameterCount, Nothing, useSiteInfo)
+                                          method.ParameterCount,
+                                          argumentNames:=Nothing,
+                                          someCandidatesHaveOverloadResolutionPriority,
+                                          useSiteInfo)
                     End If
                 End If
             Next
@@ -3243,7 +3250,10 @@ Next_i:
                                                                         If(argument2 Is Nothing,
                                                                            ImmutableArray.Create(argument1),
                                                                            ImmutableArray.Create(Of BoundExpression)(argument1, argument2)),
-                                                                        Nothing, Nothing, lateBindingIsAllowed, binder:=binder,
+                                                                        argumentNames:=Nothing,
+                                                                        someCandidatesHaveOverloadResolutionPriority,
+                                                                        delegateReturnType:=Nothing,
+                                                                        lateBindingIsAllowed, binder:=binder,
                                                                         asyncLambdaSubToFunctionMismatch:=Nothing,
                                                                         callerInfoOpt:=Nothing, forceExpandedForm:=False,
                                                                         useSiteInfo:=useSiteInfo)
@@ -3366,7 +3376,6 @@ Next_i:
                     Return _parameterToLift.MarshallingInformation
                 End Get
             End Property
-
 
             Friend Overrides ReadOnly Property HasOptionCompare As Boolean
                 Get

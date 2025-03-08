@@ -142,7 +142,18 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             End Get
         End Property
 
+        Friend Overrides Function GetGuidString(ByRef guidString As String) As Boolean
+            guidString = Nothing
+            Return False
+        End Function
+
         Friend Overrides ReadOnly Property HasVisualBasicEmbeddedAttribute As Boolean
+            Get
+                Return False
+            End Get
+        End Property
+
+        Friend Overrides ReadOnly Property HasCompilerLoweringPreserveAttribute As Boolean
             Get
                 Return False
             End Get

@@ -94,7 +94,7 @@ Detect and offer editor features for JSON strings;
 Use enhanced colors;
 Editor Color Scheme;
 Inheritance Margin;</source>
-        <target state="needs-review-translation">Podtrhnout znovu přiřazené proměnné;
+        <target state="translated">Podtrhnout znovu přiřazené proměnné;
 Zobrazovat vložené nápovědy;
 Zobrazit diagnostiku pro zavřené soubory;
 Vybarvit regulární výraz;
@@ -114,6 +114,9 @@ Zvýrazňovat odkazy na symbol pod kurzorem;
 Zvýrazňovat související klíčová slova pod kurzorem;
 Sbalení;
 Po otevření souborů přejít do režimu osnovy;
+Sbalit #regions při otevření souboru;
+Sbalit použití při otevření souboru;
+Sbalit implementace metadat při otevření souboru;
 Zobrazovat oddělovače řádků procedur;
 Zobrazit sbalení pro konstrukty na úrovni deklarace;
 Zobrazit sbalení pro konstrukty na úrovni kódu;
@@ -149,7 +152,7 @@ JSON;
 Obarvit řetězce JSON;
 Nahlásit neplatné řetězce JSON;
 Rozpoznat a nabízet funkce editoru pro řetězce JSON;
-Používat rozšířené barvy;
+ rozšířené barvy;
 Barevné schéma editoru;
 Okraj dědičnosti;</target>
         <note>C# Advanced options page keywords</note>
@@ -407,14 +410,34 @@ Zobrazit položky z neimportovaných oborů názvů (experimentální);</target>
         <target state="translated">Komponenty C# použité v IDE. V závislosti na typu vašeho projektu a nastavení se může použít jiná verze kompilátoru.</target>
         <note>Help &gt; About</note>
       </trans-unit>
-      <trans-unit id="An_empty_CSharp_script_file">
-        <source>An empty C# script file.</source>
-        <target state="translated">Prázdný soubor skriptu C#</target>
+      <trans-unit id="Always_add_new_line_on_enter">
+        <source>Always add new line on enter</source>
+        <target state="translated">Při stisku Enter vždy přidat nový řádek</target>
         <note />
       </trans-unit>
-      <trans-unit id="Visual_CSharp_Script">
-        <source>Visual C# Script</source>
-        <target state="translated">Skript Visual C#</target>
+      <trans-unit id="Always_include_snippets">
+        <source>Always include snippets</source>
+        <target state="translated">Vždy zahrnovat fragmenty</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Default">
+        <source>Default</source>
+        <target state="translated">Výchozí</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Include_snippets_when_Tab_is_typed_after_an_identifier">
+        <source>Include snippets when Tab is typed after an identifier</source>
+        <target state="translated">Zahrnout fragmenty kódu při zadání tabulátoru za identifikátor</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Never_add_new_line_on_enter">
+        <source>Never add new line on enter</source>
+        <target state="translated">Při stisku Enter nikdy nepřidávat nový řádek</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Never_include_snippets">
+        <source>Never include snippets</source>
+        <target state="translated">Nikdy nezahrnovat fragmenty</target>
         <note />
       </trans-unit>
     </body>

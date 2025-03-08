@@ -29,7 +29,7 @@ namespace Microsoft.CodeAnalysis.UnitTests.Renamer
             public string Text { get; set; }
             public string DocumentName { get; set; }
             public string DocumentFilePath { get; set; }
-            public string[] DocumentFolders => GetDocumentFolders(DocumentFilePath);
+            public readonly string[] DocumentFolders => GetDocumentFolders(DocumentFilePath);
         }
 
         protected async Task TestRenameDocument(
@@ -47,7 +47,7 @@ namespace Microsoft.CodeAnalysis.UnitTests.Renamer
             solution = solution
                     .AddProject(projectInfo);
 
-            var remainingErrors = new HashSet<string>(expectedErrors ?? new string[0]);
+            var remainingErrors = new HashSet<string>(expectedErrors ?? []);
 
             for (var i = 0; i < startDocuments.Length; i++)
             {
@@ -99,7 +99,7 @@ namespace Microsoft.CodeAnalysis.UnitTests.Renamer
                 }
 
                 AssertEx.EqualOrDiff(endDocument.Text, (await updatedDocument.GetTextAsync()).ToString());
-                Assert.Equal(0, remainingErrors.Count);
+                Assert.Empty(remainingErrors);
             }
         }
 
@@ -116,7 +116,7 @@ namespace Microsoft.CodeAnalysis.UnitTests.Renamer
                 return splitPath;
             }
 
-            return splitPath.Take(splitPath.Length - 1).ToArray();
+            return [.. splitPath.Take(splitPath.Length - 1)];
         }
 
         protected Task TestRenameDocument(string startText, string expectedText, string newDocumentName = null, string newDocumentPath = null, string documentName = null, string documentPath = null, string[] expectedErrors = null)
@@ -219,19 +219,17 @@ namespace Microsoft.CodeAnalysis.UnitTests.Renamer
 
             solution = solution.AddProject(projectInfo);
 
-            var startSourceText = SourceText.From(startText);
+            var startSourceText = SourceText.From(startText, encoding: null, SourceHashAlgorithms.Default);
             var documentId = DocumentId.CreateNewId(projectId);
 
             var documentInfo = DocumentInfo.Create(
                 documentId,
                 documentName,
-                GetDocumentFolders(s_defaultDocumentPath),
-                SourceCodeKind.Regular,
-                TextLoader.From(TextAndVersion.Create(startSourceText, VersionStamp.Create(), documentName)),
-                s_defaultDocumentPath,
-                isGenerated: true,
-                designTimeOnly: false,
-                new TestDocumentServiceProvider());
+                folders: GetDocumentFolders(s_defaultDocumentPath),
+                loader: TextLoader.From(TextAndVersion.Create(startSourceText, VersionStamp.Create(), documentName)),
+                filePath: s_defaultDocumentPath,
+                isGenerated: true)
+                .WithDocumentServiceProvider(new TestDocumentServiceProvider());
 
             solution = solution.AddDocument(documentInfo);
 

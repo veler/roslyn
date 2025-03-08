@@ -30,8 +30,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeRefactorings.InlineTemporary
             Dim document = context.Document
             Dim cancellationToken = context.CancellationToken
 
-            Dim workspace = document.Project.Solution.Workspace
-            If workspace.Kind = WorkspaceKind.MiscellaneousFiles Then
+            If document.Project.Solution.WorkspaceKind = WorkspaceKind.MiscellaneousFiles Then
                 Return
             End If
 
@@ -61,9 +60,9 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeRefactorings.InlineTemporary
 
             context.RegisterRefactoring(
                 CodeAction.Create(
-                    VBFeaturesResources.Inline_temporary_variable,
+                    FeaturesResources.Inline_temporary_variable,
                     Function(c) InlineTemporaryAsync(document, modifiedIdentifier, c),
-                    NameOf(VBFeaturesResources.Inline_temporary_variable)),
+                    NameOf(FeaturesResources.Inline_temporary_variable)),
                 variableDeclarator.Span)
         End Function
 
@@ -183,7 +182,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeRefactorings.InlineTemporary
             updatedDocument = Await updatedDocument.ReplaceNodesAsync(
                 topMostStatements,
                 Function(o, n)
-                    Return Simplifier.Expand(DirectCast(n, StatementSyntax), semanticModel, document.Project.Solution.Workspace, cancellationToken:=cancellationToken)
+                    Return Simplifier.Expand(DirectCast(n, StatementSyntax), semanticModel, document.Project.Solution.Services, cancellationToken:=cancellationToken)
                 End Function,
                 cancellationToken).ConfigureAwait(False)
 
@@ -464,7 +463,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeRefactorings.InlineTemporary
             ' Replace the conflicting inlined nodes with the original nodes annotated with conflict annotation.
             Dim conflictAnnotationAdder = Function(oldNode As SyntaxNode, newNode As SyntaxNode) As SyntaxNode
                                               Return newNode _
-                                                  .WithAdditionalAnnotations(ConflictAnnotation.Create(VBFeaturesResources.Conflict_s_detected))
+                                                  .WithAdditionalAnnotations(ConflictAnnotation.Create(FeaturesResources.Conflict_s_detected))
                                           End Function
 
             Return Await inlinedDocument.ReplaceNodesAsync(replacementNodesWithChangedSemantics.Keys, conflictAnnotationAdder, cancellationToken).ConfigureAwait(False)

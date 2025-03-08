@@ -124,8 +124,7 @@ End Class</code>.Value.Replace(vbLf, vbCrLf)
             Await TestAsync(code, indentation:=30)
         End Function
 
-        <WorkItem(542240, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/542240")>
-        <Fact>
+        <Fact, WorkItem("http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/542240")>
         <Trait(Traits.Feature, Traits.Features.SmartTokenFormatting)>
         Public Async Function MissingEndStatement() As Task
             Dim code = <code>Module Module1
@@ -139,8 +138,7 @@ End Module</code>.Value.Replace(vbLf, vbCrLf)
             Await TestAsync(code, indentation:=4)
         End Function
 
-        <WorkItem(542240, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/542240")>
-        <Fact>
+        <Fact, WorkItem("http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/542240")>
         <Trait(Traits.Feature, Traits.Features.SmartTokenFormatting)>
         Public Async Function EmptyElement1() As Task
             Await TestAsync(My.Resources.XmlLiterals.EmptyElement1, indentation:=23)
@@ -176,12 +174,12 @@ End Class
             Assert.NotNull(Await Record.ExceptionAsync(Function() TestAsync(codeWithMarkup, indentation, indentStyle:=indentStyle)))
         End Function
 
-        Private Shared Async Function TestAsync(codeWithMarkup As String, indentation As Integer, Optional indentStyle As FormattingOptions2.IndentStyle = FormattingOptions2.IndentStyle.Smart) As Threading.Tasks.Task
+        Private Shared Async Function TestAsync(codeWithMarkup As String, indentation As Integer, Optional indentStyle As FormattingOptions2.IndentStyle = FormattingOptions2.IndentStyle.Smart) As Task
             Dim code As String = Nothing
             Dim position As Integer = 0
             MarkupTestFile.GetPosition(codeWithMarkup, code, position)
 
-            Using workspace = TestWorkspace.CreateVisualBasic(code)
+            Using workspace = EditorTestWorkspace.CreateVisualBasic(code)
                 Dim hostdoc = workspace.Documents.First()
                 Dim buffer = hostdoc.GetTextBuffer()
 
@@ -205,7 +203,7 @@ End Class
 
                 Dim formatOptions = VisualBasicSyntaxFormattingOptions.Default
                 Dim smartFormatter = New VisualBasicSmartTokenFormatter(formatOptions, formattingRules, root)
-                Dim changes = Await smartFormatter.FormatTokenAsync(token, Nothing)
+                Dim changes = smartFormatter.FormatToken(token, Nothing)
 
                 Using edit = buffer.CreateEdit()
                     For Each change In changes

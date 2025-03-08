@@ -6,7 +6,7 @@ Imports System.Collections.Immutable
 Imports System.Text
 Imports System.Threading
 Imports Microsoft.CodeAnalysis
-Imports Microsoft.CodeAnalysis.LanguageServices
+Imports Microsoft.CodeAnalysis.LanguageService
 Imports Microsoft.CodeAnalysis.PooledObjects
 Imports Microsoft.CodeAnalysis.Text
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
@@ -19,8 +19,9 @@ Imports Microsoft.CodeAnalysis.Internal.Editing
 Imports Microsoft.CodeAnalysis.Editing
 #End If
 
-Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
+Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageService
     Friend Class VisualBasicSyntaxFacts
+        Inherits AbstractSyntaxFacts
         Implements ISyntaxFacts
 
         Private Const DoesNotExistInVBErrorMessage = "This feature does not exist in VB"
@@ -30,29 +31,13 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
         Protected Sub New()
         End Sub
 
-        Public ReadOnly Property IsCaseSensitive As Boolean Implements ISyntaxFacts.IsCaseSensitive
-            Get
-                Return False
-            End Get
-        End Property
+        Public ReadOnly Property IsCaseSensitive As Boolean = False Implements ISyntaxFacts.IsCaseSensitive
 
-        Public ReadOnly Property StringComparer As StringComparer Implements ISyntaxFacts.StringComparer
-            Get
-                Return CaseInsensitiveComparison.Comparer
-            End Get
-        End Property
+        Public ReadOnly Property StringComparer As StringComparer = CaseInsensitiveComparison.Comparer Implements ISyntaxFacts.StringComparer
 
-        Public ReadOnly Property ElasticMarker As SyntaxTrivia Implements ISyntaxFacts.ElasticMarker
-            Get
-                Return SyntaxFactory.ElasticMarker
-            End Get
-        End Property
+        Public ReadOnly Property ElasticMarker As SyntaxTrivia = SyntaxFactory.ElasticMarker Implements ISyntaxFacts.ElasticMarker
 
-        Public ReadOnly Property ElasticCarriageReturnLineFeed As SyntaxTrivia Implements ISyntaxFacts.ElasticCarriageReturnLineFeed
-            Get
-                Return SyntaxFactory.ElasticCarriageReturnLineFeed
-            End Get
-        End Property
+        Public ReadOnly Property ElasticCarriageReturnLineFeed As SyntaxTrivia = SyntaxFactory.ElasticCarriageReturnLineFeed Implements ISyntaxFacts.ElasticCarriageReturnLineFeed
 
         Public ReadOnly Property SyntaxKinds As ISyntaxKinds = VisualBasicSyntaxKinds.Instance Implements ISyntaxFacts.SyntaxKinds
 
@@ -81,6 +66,23 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
         End Function
 
         Public Function SupportsConstantInterpolatedStrings(options As ParseOptions) As Boolean Implements ISyntaxFacts.SupportsConstantInterpolatedStrings
+            Return False
+        End Function
+
+        Public Function SupportsTupleDeconstruction(options As ParseOptions) As Boolean Implements ISyntaxFacts.SupportsTupleDeconstruction
+            ' While VB supports tuples, it does not support deconstruction.
+            Return False
+        End Function
+
+        Public Function SupportsCollectionExpressionNaturalType(options As ParseOptions) As Boolean Implements ISyntaxFacts.SupportsCollectionExpressionNaturalType
+            Return False
+        End Function
+
+        Public Function SupportsImplicitImplementationOfNonPublicInterfaceMembers(options As ParseOptions) As Boolean Implements ISyntaxFacts.SupportsImplicitImplementationOfNonPublicInterfaceMembers
+            Return True
+        End Function
+
+        Public Function SupportsFieldExpression(options As ParseOptions) As Boolean Implements ISyntaxFacts.SupportsFieldExpression
             Return False
         End Function
 
@@ -155,11 +157,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return False
         End Function
 
-        Public Function IsAttributeName(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsAttributeName
-            Return node.IsParentKind(SyntaxKind.Attribute) AndAlso
-                DirectCast(node.Parent, AttributeSyntax).Name Is node
-        End Function
-
         Public Function IsNameOfSimpleMemberAccessExpression(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsNameOfSimpleMemberAccessExpression
             Dim vbNode = TryCast(node, ExpressionSyntax)
             Return vbNode IsNot Nothing AndAlso vbNode.IsSimpleMemberAccessExpressionName()
@@ -208,6 +205,10 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return False
         End Function
 
+        Public Function IsUsingLocalDeclarationStatement(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsUsingLocalDeclarationStatement
+            Return False
+        End Function
+
         Public Function IsStatement(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsStatement
             Return TypeOf node Is StatementSyntax
         End Function
@@ -224,13 +225,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
         Public Function GetStatementOfGlobalStatement(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetStatementOfGlobalStatement
             ' Global statements doesn't exist in VB
             Throw New InvalidOperationException(DoesNotExistInVBErrorMessage)
-        End Function
-
-        Public Function AreStatementsInSameContainer(firstStatement As SyntaxNode, secondStatement As SyntaxNode) As Boolean Implements ISyntaxFacts.AreStatementsInSameContainer
-            Debug.Assert(IsStatement(firstStatement))
-            Debug.Assert(IsStatement(secondStatement))
-
-            Return firstStatement.Parent Is secondStatement.Parent
         End Function
 
         Public Function IsMethodBody(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsMethodBody
@@ -507,7 +501,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return token.IsKind(SyntaxKind.StringLiteralToken, SyntaxKind.InterpolatedStringTextToken)
         End Function
 
-        Public Function IsBindableToken(token As SyntaxToken) As Boolean Implements ISyntaxFacts.IsBindableToken
+        Public Function IsBindableToken(semanticModel As SemanticModel, token As SyntaxToken) As Boolean Implements ISyntaxFacts.IsBindableToken
             Return Me.IsWord(token) OrElse
                 Me.IsLiteral(token) OrElse
                 Me.IsOperator(token)
@@ -525,6 +519,15 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
 
         Public Function LooksGeneric(name As SyntaxNode) As Boolean Implements ISyntaxFacts.LooksGeneric
             Return name.IsKind(SyntaxKind.GenericName)
+        End Function
+
+        Public Function GetTypeArgumentsOfGenericName(genericName As SyntaxNode) As SeparatedSyntaxList(Of SyntaxNode) Implements ISyntaxFacts.GetTypeArgumentsOfGenericName
+            Dim castGenericName = TryCast(genericName, GenericNameSyntax)
+            If castGenericName IsNot Nothing Then
+                Return castGenericName.TypeArgumentList.Arguments
+            End If
+
+            Return Nothing
         End Function
 
         Public Function GetExpressionOfMemberAccessExpression(node As SyntaxNode, Optional allowImplicitTarget As Boolean = False) As SyntaxNode Implements ISyntaxFacts.GetExpressionOfMemberAccessExpression
@@ -611,10 +614,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return False
         End Function
 
-        Public Function GetNameOfAttribute(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetNameOfAttribute
-            Return DirectCast(node, AttributeSyntax).Name
-        End Function
-
         Public Function IsAttributeNamedArgumentIdentifier(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsAttributeNamedArgumentIdentifier
             Dim identifierName = TryCast(node, IdentifierNameSyntax)
             Return identifierName.IsParentKind(SyntaxKind.NameColonEquals) AndAlso
@@ -693,11 +692,56 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return node.Kind = SyntaxKind.InvocationExpression OrElse node.Kind = SyntaxKind.DictionaryAccessExpression
         End Function
 
-        Public Function IsIndexerMemberCRef(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsIndexerMemberCRef
-            Return False
+        Public Function GetContainingMemberDeclaration(root As SyntaxNode, position As Integer, Optional useFullSpan As Boolean = True) As SyntaxNode Implements ISyntaxFacts.GetContainingMemberDeclaration
+            Dim isApplicableDeclaration = Function(node As SyntaxNode)
+                                              If TypeOf node Is MethodBlockBaseSyntax AndAlso TypeOf node.Parent IsNot PropertyBlockSyntax Then
+                                                  Return True
+                                              End If
+
+                                              If TypeOf node Is MethodBaseSyntax AndAlso TypeOf node.Parent IsNot MethodBlockBaseSyntax Then
+                                                  Return True
+                                              End If
+
+                                              If TypeOf node Is PropertyStatementSyntax AndAlso TypeOf node.Parent IsNot PropertyBlockSyntax Then
+                                                  Return True
+                                              End If
+
+                                              If TypeOf node Is EventStatementSyntax AndAlso TypeOf node.Parent IsNot EventBlockSyntax Then
+                                                  Return True
+                                              End If
+
+                                              If TypeOf node Is PropertyBlockSyntax OrElse
+                                                 TypeOf node Is TypeBlockSyntax OrElse
+                                                 TypeOf node Is EnumBlockSyntax OrElse
+                                                 TypeOf node Is NamespaceBlockSyntax OrElse
+                                                 TypeOf node Is EventBlockSyntax OrElse
+                                                 TypeOf node Is FieldDeclarationSyntax Then
+                                                  Return True
+                                              End If
+
+                                              Return False
+                                          End Function
+
+            Return GetContainingMemberDeclaration(root, position, isApplicableDeclaration, useFullSpan)
         End Function
 
-        Public Function GetContainingMemberDeclaration(root As SyntaxNode, position As Integer, Optional useFullSpan As Boolean = True) As SyntaxNode Implements ISyntaxFacts.GetContainingMemberDeclaration
+        Public Function GetContainingMethodDeclaration(root As SyntaxNode, position As Integer, Optional useFullSpan As Boolean = True) As SyntaxNode Implements ISyntaxFacts.GetContainingMethodDeclaration
+            Dim isApplicableDeclaration = Function(node As SyntaxNode)
+                                              If TypeOf node Is MethodBlockBaseSyntax AndAlso TypeOf node.Parent IsNot PropertyBlockSyntax Then
+                                                  Return True
+                                              End If
+
+                                              If TypeOf node Is MethodBaseSyntax AndAlso TypeOf node.Parent IsNot MethodBlockBaseSyntax Then
+                                                  Return True
+                                              End If
+
+                                              Return False
+                                          End Function
+
+            Return GetContainingMemberDeclaration(root, position, isApplicableDeclaration, useFullSpan)
+        End Function
+
+        Private Shared Function GetContainingMemberDeclaration(root As SyntaxNode, position As Integer, isApplicableDeclaration As Func(Of SyntaxNode, Boolean), Optional useFullSpan As Boolean = True) As SyntaxNode
             Dim [end] = root.FullSpan.End
             If [end] = 0 Then
                 ' empty file
@@ -710,29 +754,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Dim node = root.FindToken(position).Parent
             While node IsNot Nothing
                 If useFullSpan OrElse node.Span.Contains(position) Then
-
-                    If TypeOf node Is MethodBlockBaseSyntax AndAlso Not TypeOf node.Parent Is PropertyBlockSyntax Then
-                        Return node
-                    End If
-
-                    If TypeOf node Is MethodBaseSyntax AndAlso Not TypeOf node.Parent Is MethodBlockBaseSyntax Then
-                        Return node
-                    End If
-
-                    If TypeOf node Is PropertyStatementSyntax AndAlso Not TypeOf node.Parent Is PropertyBlockSyntax Then
-                        Return node
-                    End If
-
-                    If TypeOf node Is EventStatementSyntax AndAlso Not TypeOf node.Parent Is EventBlockSyntax Then
-                        Return node
-                    End If
-
-                    If TypeOf node Is PropertyBlockSyntax OrElse
-                       TypeOf node Is TypeBlockSyntax OrElse
-                       TypeOf node Is EnumBlockSyntax OrElse
-                       TypeOf node Is NamespaceBlockSyntax OrElse
-                       TypeOf node Is EventBlockSyntax OrElse
-                       TypeOf node Is FieldDeclarationSyntax Then
+                    If isApplicableDeclaration(node) Then
                         Return node
                     End If
                 End If
@@ -750,23 +772,23 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             ' like AccessorStatementSyntax and DelegateStatementSyntax that we never want to tread as method level
             ' members.
 
-            If TypeOf node Is MethodStatementSyntax AndAlso Not TypeOf node.Parent Is MethodBlockBaseSyntax Then
+            If TypeOf node Is MethodStatementSyntax AndAlso TypeOf node.Parent IsNot MethodBlockBaseSyntax Then
                 Return True
             End If
 
-            If TypeOf node Is SubNewStatementSyntax AndAlso Not TypeOf node.Parent Is MethodBlockBaseSyntax Then
+            If TypeOf node Is SubNewStatementSyntax AndAlso TypeOf node.Parent IsNot MethodBlockBaseSyntax Then
                 Return True
             End If
 
-            If TypeOf node Is OperatorStatementSyntax AndAlso Not TypeOf node.Parent Is MethodBlockBaseSyntax Then
+            If TypeOf node Is OperatorStatementSyntax AndAlso TypeOf node.Parent IsNot MethodBlockBaseSyntax Then
                 Return True
             End If
 
-            If TypeOf node Is PropertyStatementSyntax AndAlso Not TypeOf node.Parent Is PropertyBlockSyntax Then
+            If TypeOf node Is PropertyStatementSyntax AndAlso TypeOf node.Parent IsNot PropertyBlockSyntax Then
                 Return True
             End If
 
-            If TypeOf node Is EventStatementSyntax AndAlso Not TypeOf node.Parent Is EventBlockSyntax Then
+            If TypeOf node Is EventStatementSyntax AndAlso TypeOf node.Parent IsNot EventBlockSyntax Then
                 Return True
             End If
 
@@ -862,18 +884,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
         Private Shared Function GetSeparatedSyntaxListSpan(Of T As SyntaxNode)(list As SeparatedSyntaxList(Of T)) As TextSpan
             Debug.Assert(list.Count > 0)
             Return TextSpan.FromBounds(list.First.SpanStart, list.Last.Span.End)
-        End Function
-
-        Public Function GetTopLevelAndMethodLevelMembers(root As SyntaxNode) As List(Of SyntaxNode) Implements ISyntaxFacts.GetTopLevelAndMethodLevelMembers
-            Dim list = New List(Of SyntaxNode)()
-            AppendMembers(root, list, topLevel:=True, methodLevel:=True)
-            Return list
-        End Function
-
-        Public Function GetMethodLevelMembers(root As SyntaxNode) As List(Of SyntaxNode) Implements ISyntaxFacts.GetMethodLevelMembers
-            Dim list = New List(Of SyntaxNode)()
-            AppendMembers(root, list, topLevel:=False, methodLevel:=True)
-            Return list
         End Function
 
         Public Function GetMembersOfTypeDeclaration(typeDeclaration As SyntaxNode) As SyntaxList(Of SyntaxNode) Implements ISyntaxFacts.GetMembersOfTypeDeclaration
@@ -1020,7 +1030,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             End If
         End Sub
 
-        Private Sub AppendMembers(node As SyntaxNode, list As List(Of SyntaxNode), topLevel As Boolean, methodLevel As Boolean)
+        Protected Overrides Sub AppendMembers(node As SyntaxNode, list As ArrayBuilder(Of SyntaxNode), topLevel As Boolean, methodLevel As Boolean)
             Debug.Assert(topLevel OrElse methodLevel)
 
             For Each member In node.GetMembers()
@@ -1102,7 +1112,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return constructors
         End Function
 
-        Private Sub AppendConstructors(members As SyntaxList(Of StatementSyntax), constructors As List(Of SyntaxNode), cancellationToken As CancellationToken)
+        Private Shared Sub AppendConstructors(members As SyntaxList(Of StatementSyntax), constructors As List(Of SyntaxNode), cancellationToken As CancellationToken)
             For Each member As StatementSyntax In members
                 cancellationToken.ThrowIfCancellationRequested()
 
@@ -1209,6 +1219,11 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
 
         Public Function IsVerbatimStringLiteral(token As SyntaxToken) As Boolean Implements ISyntaxFacts.IsVerbatimStringLiteral
             ' VB does not have verbatim strings
+            Return False
+        End Function
+
+        Public Function IsRawStringLiteral(token As SyntaxToken) As Boolean Implements ISyntaxFacts.IsRawStringLiteral
+            ' VB does not have raw strings
             Return False
         End Function
 
@@ -1416,20 +1431,8 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return node IsNot Nothing AndAlso TryCast(node.Parent, ForEachStatementSyntax)?.Expression Is node
         End Function
 
-        Public Function GetExpressionOfForeachStatement(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetExpressionOfForeachStatement
-            Return DirectCast(node, ForEachStatementSyntax).Expression
-        End Function
-
         Public Function GetExpressionOfExpressionStatement(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetExpressionOfExpressionStatement
             Return DirectCast(node, ExpressionStatementSyntax).Expression
-        End Function
-
-        Public Function IsIsTypeExpression(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsIsTypeExpression
-            Return node.IsKind(SyntaxKind.TypeOfIsExpression)
-        End Function
-
-        Public Function IsIsNotTypeExpression(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsIsNotTypeExpression
-            Return node.IsKind(SyntaxKind.TypeOfIsNotExpression)
         End Function
 
         Public Sub GetPartsOfTupleExpression(Of TArgumentSyntax As SyntaxNode)(node As SyntaxNode, ByRef openParen As SyntaxToken, ByRef arguments As SeparatedSyntaxList(Of TArgumentSyntax), ByRef closeParen As SyntaxToken) Implements ISyntaxFacts.GetPartsOfTupleExpression
@@ -1441,6 +1444,14 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
 
         Public Function IsPreprocessorDirective(trivia As SyntaxTrivia) As Boolean Implements ISyntaxFacts.IsPreprocessorDirective
             Return SyntaxFacts.IsPreprocessorDirective(trivia.Kind())
+        End Function
+
+        Public Function GetMatchingDirective(directive As SyntaxNode, cancellationToken As CancellationToken) As SyntaxNode Implements ISyntaxFacts.GetMatchingDirective
+            Return DirectCast(directive, DirectiveTriviaSyntax).GetMatchingStartOrEndDirective(cancellationToken)
+        End Function
+
+        Public Function GetMatchingConditionalDirectives(directive As SyntaxNode, cancellationToken As CancellationToken) As ImmutableArray(Of SyntaxNode) Implements ISyntaxFacts.GetMatchingConditionalDirectives
+            Return DirectCast(directive, DirectiveTriviaSyntax).GetMatchingConditionalDirectives(cancellationToken).CastArray(Of SyntaxNode)
         End Function
 
         Public Function IsRegularComment(trivia As SyntaxTrivia) As Boolean Implements ISyntaxFacts.IsRegularComment
@@ -1481,6 +1492,10 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
 
         Public Function GetInitializerOfVariableDeclarator(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetInitializerOfVariableDeclarator
             Return DirectCast(node, VariableDeclaratorSyntax).Initializer
+        End Function
+
+        Public Function GetInitializerOfPropertyDeclaration(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetInitializerOfPropertyDeclaration
+            Return DirectCast(node, PropertyBlockSyntax).PropertyStatement.Initializer
         End Function
 
         Public Function GetTypeOfVariableDeclarator(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetTypeOfVariableDeclarator
@@ -1534,6 +1549,11 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
 
         Public Function IsPostfixUnaryExpression(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsPostfixUnaryExpression
             ' Does not exist in VB.
+            Return False
+        End Function
+
+        Public Function IsElementBindingExpression(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsElementBindingExpression
+            ' Does not exist in VB.  VB represents an element binding as a InvocationExpression with null target.
             Return False
         End Function
 
@@ -1656,15 +1676,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return DirectCast(options, VisualBasicParseOptions).LanguageVersion >= LanguageVersion.VisualBasic14
         End Function
 
-        Public Function IsIsPatternExpression(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsIsPatternExpression
-            Return False
-        End Function
-
         Public Function IsAnyPattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsAnyPattern
-            Return False
-        End Function
-
-        Public Function IsAndPattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsAndPattern
             Return False
         End Function
 
@@ -1672,39 +1684,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return False
         End Function
 
-        Public Function IsConstantPattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsConstantPattern
-            Return False
-        End Function
-
-        Public Function IsDeclarationPattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsDeclarationPattern
-            Return False
-        End Function
-
-        Public Function IsNotPattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsNotPattern
-            Return False
-        End Function
-
-        Public Function IsOrPattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsOrPattern
-            Return False
-        End Function
-
-        Public Function IsParenthesizedPattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsParenthesizedPattern
-            Return False
-        End Function
-
-        Public Function IsRecursivePattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsRecursivePattern
-            Return False
-        End Function
-
         Public Function IsUnaryPattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsUnaryPattern
-            Return False
-        End Function
-
-        Public Function IsTypePattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsTypePattern
-            Return False
-        End Function
-
-        Public Function IsVarPattern(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsVarPattern
             Return False
         End Function
 
@@ -1731,6 +1711,10 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
         End Sub
 
         Public Sub GetPartsOfUnaryPattern(node As SyntaxNode, ByRef operatorToken As SyntaxToken, ByRef pattern As SyntaxNode) Implements ISyntaxFacts.GetPartsOfUnaryPattern
+            Throw New InvalidOperationException(DoesNotExistInVBErrorMessage)
+        End Sub
+
+        Public Sub GetPartsOfRelationalPattern(node As SyntaxNode, ByRef operatorToken As SyntaxToken, ByRef expression As SyntaxNode) Implements ISyntaxFacts.GetPartsOfRelationalPattern
             Throw New InvalidOperationException(DoesNotExistInVBErrorMessage)
         End Sub
 
@@ -1780,8 +1764,20 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return TypeOf node Is MemberAccessExpressionSyntax
         End Function
 
+        Public Function IsMethodDeclaration(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsMethodDeclaration
+            Return TypeOf node Is MethodBlockSyntax
+        End Function
+
         Public Function IsSimpleName(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsSimpleName
             Return TypeOf node Is SimpleNameSyntax
+        End Function
+
+        Public Function IsAnyName(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsAnyName
+            Return TypeOf node Is NameSyntax
+        End Function
+
+        Public Function IsAnyType(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsAnyType
+            Return TypeOf node Is TypeSyntax
         End Function
 
         Public Function IsNamedMemberInitializer(node As SyntaxNode) As Boolean Implements ISyntaxFacts.IsNamedMemberInitializer
@@ -1803,6 +1799,23 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
 #End Region
 
 #Region "GetPartsOfXXX members"
+
+        Public Sub GetPartsOfAliasQualifiedName(node As SyntaxNode, ByRef [alias] As SyntaxNode, ByRef colonColonToken As SyntaxToken, ByRef name As SyntaxNode) Implements ISyntaxFacts.GetPartsOfAliasQualifiedName
+            Throw New InvalidOperationException(DoesNotExistInVBErrorMessage)
+        End Sub
+
+        Public Sub GetPartsOfArgumentList(node As SyntaxNode, ByRef openParenToken As SyntaxToken, ByRef arguments As SeparatedSyntaxList(Of SyntaxNode), ByRef closeParenToken As SyntaxToken) Implements ISyntaxFacts.GetPartsOfArgumentList
+            Dim argumentList = DirectCast(node, ArgumentListSyntax)
+            openParenToken = argumentList.OpenParenToken
+            arguments = argumentList.Arguments
+            closeParenToken = argumentList.CloseParenToken
+        End Sub
+
+        Public Sub GetPartsOfAttribute(node As SyntaxNode, ByRef name As SyntaxNode, ByRef argumentList As SyntaxNode) Implements ISyntaxFacts.GetPartsOfAttribute
+            Dim attribute = DirectCast(node, AttributeSyntax)
+            name = attribute.Name
+            argumentList = attribute.ArgumentList
+        End Sub
 
         Public Sub GetPartsOfBaseObjectCreationExpression(node As SyntaxNode, ByRef argumentList As SyntaxNode, ByRef initializer As SyntaxNode) Implements ISyntaxFacts.GetPartsOfBaseObjectCreationExpression
             Dim objectCreationExpression = DirectCast(node, ObjectCreationExpressionSyntax)
@@ -1837,6 +1850,10 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             whenTrue = conditionalExpression.WhenTrue
             whenFalse = conditionalExpression.WhenFalse
         End Sub
+
+        Public Function GetExpressionOfForeachStatement(statement As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetExpressionOfForeachStatement
+            Return DirectCast(statement, ForEachStatementSyntax).Expression
+        End Function
 
         Public Sub GetPartsOfInterpolationExpression(node As SyntaxNode, ByRef stringStartToken As SyntaxToken, ByRef contents As SyntaxList(Of SyntaxNode), ByRef stringEndToken As SyntaxToken) Implements ISyntaxFacts.GetPartsOfInterpolationExpression
             Dim interpolatedStringExpression = DirectCast(node, InterpolatedStringExpressionSyntax)
@@ -1877,11 +1894,16 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             expression = namedField.Expression
         End Sub
 
-        Public Sub GetPartsOfObjectCreationExpression(node As SyntaxNode, ByRef type As SyntaxNode, ByRef argumentList As SyntaxNode, ByRef initializer As SyntaxNode) Implements ISyntaxFacts.GetPartsOfObjectCreationExpression
+        Public Sub GetPartsOfObjectCreationExpression(node As SyntaxNode, ByRef keyword As SyntaxToken, ByRef type As SyntaxNode, ByRef argumentList As SyntaxNode, ByRef initializer As SyntaxNode) Implements ISyntaxFacts.GetPartsOfObjectCreationExpression
             Dim objectCreationExpression = DirectCast(node, ObjectCreationExpressionSyntax)
+            keyword = objectCreationExpression.NewKeyword
             type = objectCreationExpression.Type
             argumentList = objectCreationExpression.ArgumentList
             initializer = objectCreationExpression.Initializer
+        End Sub
+
+        Public Sub GetPartsOfImplicitObjectCreationExpression(node As SyntaxNode, ByRef keyword As SyntaxToken, ByRef argumentList As SyntaxNode, ByRef initializer As SyntaxNode) Implements ISyntaxFacts.GetPartsOfImplicitObjectCreationExpression
+            Throw New InvalidOperationException(DoesNotExistInVBErrorMessage)
         End Sub
 
         Public Sub GetPartsOfParameter(node As SyntaxNode, ByRef identifier As SyntaxToken, ByRef [default] As SyntaxNode) Implements ISyntaxFacts.GetPartsOfParameter
@@ -1914,13 +1936,24 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
 
 #Region "GetXXXOfYYY members"
 
+        Public Function GetArgumentListOfImplicitElementAccess(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetArgumentListOfImplicitElementAccess
+            Throw New InvalidOperationException(DoesNotExistInVBErrorMessage)
+        End Function
+
+        Public Function GetAttributesOfAttributeList(node As SyntaxNode) As SeparatedSyntaxList(Of SyntaxNode) Implements ISyntaxFacts.GetAttributesOfAttributeList
+            Return DirectCast(node, AttributeListSyntax).Attributes
+        End Function
+
         Public Function GetExpressionOfAwaitExpression(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetExpressionOfAwaitExpression
             Return DirectCast(node, AwaitExpressionSyntax).Expression
         End Function
 
         Public Function GetExpressionOfThrowExpression(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetExpressionOfThrowExpression
-            ' ThrowExpression doesn't exist in VB
             Throw New InvalidOperationException(DoesNotExistInVBErrorMessage)
+        End Function
+
+        Public Function GetExpressionOfThrowStatement(node As SyntaxNode) As SyntaxNode Implements ISyntaxFacts.GetExpressionOfThrowStatement
+            Return DirectCast(node, ThrowStatementSyntax).Expression
         End Function
 
         Public Function GetInitializersOfObjectMemberInitializer(node As SyntaxNode) As SeparatedSyntaxList(Of SyntaxNode) Implements ISyntaxFacts.GetInitializersOfObjectMemberInitializer
@@ -1941,6 +1974,23 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.LanguageServices
             Return initializer.Initializer.Initializers
         End Function
 
+        Public Function GetTokenOfLiteralExpression(node As SyntaxNode) As SyntaxToken Implements ISyntaxFacts.GetTokenOfLiteralExpression
+            Return DirectCast(node, LiteralExpressionSyntax).Token
+        End Function
+
+        Private Sub ISyntaxFacts_AddTopLevelAndMethodLevelMembers(root As SyntaxNode, result As ArrayBuilder(Of SyntaxNode)) Implements ISyntaxFacts.AddTopLevelAndMethodLevelMembers
+            AddTopLevelAndMethodLevelMembers(root, result)
+        End Sub
+
+        Private Sub ISyntaxFacts_AddTopLevelMembers(root As SyntaxNode, result As ArrayBuilder(Of SyntaxNode)) Implements ISyntaxFacts.AddTopLevelMembers
+            AddTopLevelMembers(root, result)
+        End Sub
+
+        Private Sub ISyntaxFacts_AddMethodLevelMembers(root As SyntaxNode, result As ArrayBuilder(Of SyntaxNode)) Implements ISyntaxFacts.AddMethodLevelMembers
+            AddMethodLevelMembers(root, result)
+        End Sub
+
 #End Region
+
     End Class
 End Namespace

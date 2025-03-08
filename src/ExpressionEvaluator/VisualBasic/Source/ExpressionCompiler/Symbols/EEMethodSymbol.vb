@@ -359,7 +359,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
 
         Public Overrides ReadOnly Property DeclaringSyntaxReferences As ImmutableArray(Of SyntaxReference)
             Get
-                Throw ExceptionUtilities.Unreachable
+                Return GetDeclaringSyntaxReferenceHelper(Of VisualBasicSyntaxNode)(_locations)
             End Get
         End Property
 
@@ -422,6 +422,10 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
                 Return False
             End Get
         End Property
+
+        Public Overrides Function GetOverloadResolutionPriority() As Integer
+            Return 0
+        End Function
 
         Friend Overrides ReadOnly Property ObsoleteAttributeData As ObsoleteAttributeData
             Get
@@ -606,7 +610,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
             End Select
         End Function
 
-        Friend Overrides Sub AddSynthesizedReturnTypeAttributes(ByRef attributes As ArrayBuilder(Of SynthesizedAttributeData))
+        Friend Overrides Sub AddSynthesizedReturnTypeAttributes(ByRef attributes As ArrayBuilder(Of VisualBasicAttributeData))
             MyBase.AddSynthesizedReturnTypeAttributes(attributes)
 
             Dim returnType = Me.ReturnType
@@ -625,6 +629,11 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
             End Get
         End Property
 
+        Friend Overrides ReadOnly Property HasSetsRequiredMembers As Boolean
+            Get
+                Return False
+            End Get
+        End Property
     End Class
 
 End Namespace

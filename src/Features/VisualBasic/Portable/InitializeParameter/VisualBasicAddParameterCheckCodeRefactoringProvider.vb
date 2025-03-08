@@ -4,15 +4,8 @@
 
 Imports System.Composition
 Imports System.Diagnostics.CodeAnalysis
-Imports System.Threading
-Imports Microsoft.CodeAnalysis.CodeGeneration
 Imports Microsoft.CodeAnalysis.CodeRefactorings
-Imports Microsoft.CodeAnalysis.Editing
 Imports Microsoft.CodeAnalysis.InitializeParameter
-Imports Microsoft.CodeAnalysis.LanguageServices
-Imports Microsoft.CodeAnalysis.Options
-Imports Microsoft.CodeAnalysis.Simplification
-Imports Microsoft.CodeAnalysis.VisualBasic.LanguageServices
 Imports Microsoft.CodeAnalysis.VisualBasic.Simplification
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 
@@ -33,12 +26,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.InitializeParameter
         Public Sub New()
         End Sub
 
-        Protected Overrides ReadOnly Property SyntaxFacts As ISyntaxFacts = VisualBasicSyntaxFacts.Instance
-
-        Protected Overrides Function SupportsRecords(options As ParseOptions) As Boolean
-            Return False
-        End Function
-
         Protected Overrides Function IsFunctionDeclaration(node As SyntaxNode) As Boolean
             Return InitializeParameterHelpers.IsFunctionDeclaration(node)
         End Function
@@ -46,10 +33,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.InitializeParameter
         Protected Overrides Function GetBody(functionDeclaration As SyntaxNode) As SyntaxNode
             Return InitializeParameterHelpers.GetBody(functionDeclaration)
         End Function
-
-        Protected Overrides Sub InsertStatement(editor As SyntaxEditor, functionDeclaration As SyntaxNode, returnsVoid As Boolean, statementToAddAfterOpt As SyntaxNode, statement As StatementSyntax)
-            InitializeParameterHelpers.InsertStatement(editor, functionDeclaration, statementToAddAfterOpt, statement)
-        End Sub
 
         Protected Overrides Function IsImplicitConversion(compilation As Compilation, source As ITypeSymbol, destination As ITypeSymbol) As Boolean
             Return InitializeParameterHelpers.IsImplicitConversion(compilation, source, destination)

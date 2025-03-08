@@ -3,10 +3,10 @@
 ' See the LICENSE file in the project root for more information.
 
 Imports Microsoft.CodeAnalysis.Diagnostics
-Imports Microsoft.CodeAnalysis.LanguageServices
+Imports Microsoft.CodeAnalysis.LanguageService
 Imports Microsoft.CodeAnalysis.Operations
 Imports Microsoft.CodeAnalysis.SimplifyLinqExpression
-Imports Microsoft.CodeAnalysis.VisualBasic.LanguageServices
+Imports Microsoft.CodeAnalysis.VisualBasic.LanguageService
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 
 Namespace Microsoft.CodeAnalysis.VisualBasic.SimplifyLinqExpression
@@ -15,6 +15,8 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.SimplifyLinqExpression
         Inherits AbstractSimplifyLinqExpressionDiagnosticAnalyzer(Of InvocationExpressionSyntax, MemberAccessExpressionSyntax)
 
         Protected Overrides ReadOnly Property SyntaxFacts As ISyntaxFacts = VisualBasicSyntaxFacts.Instance
+
+        Protected Overrides ReadOnly Property ConflictsWithMemberByNameOnly As Boolean = True
 
         Protected Overrides Function TryGetNextInvocationInChain(invocation As IInvocationOperation) As IInvocationOperation
             ' Unlike C# in VB exension methods are related in a simple child-parent relationship

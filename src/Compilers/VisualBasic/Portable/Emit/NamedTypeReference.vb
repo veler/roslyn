@@ -30,6 +30,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Emit
             End Get
         End Property
 
+        Private ReadOnly Property INamedTypeReferenceAssociatedFileIdentifier As String Implements Cci.INamedTypeReference.AssociatedFileIdentifier
+            Get
+                Return Nothing
+            End Get
+        End Property
+
         Private ReadOnly Property INamedEntityName As String Implements Cci.INamedEntity.Name
             Get
                 ' CCI automatically handles type suffix, so use Name instead of MetadataName
@@ -117,12 +123,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Emit
 
         Public NotOverridable Overrides Function Equals(obj As Object) As Boolean
             ' It is not supported to rely on default equality of these Cci objects, an explicit way to compare and hash them should be used.
-            Throw Roslyn.Utilities.ExceptionUtilities.Unreachable
+            Throw ExceptionUtilities.Unreachable
         End Function
 
         Public NotOverridable Overrides Function GetHashCode() As Integer
             ' It is not supported to rely on default equality of these Cci objects, an explicit way to compare and hash them should be used.
-            Throw Roslyn.Utilities.ExceptionUtilities.Unreachable
+            Throw ExceptionUtilities.Unreachable
         End Function
     End Class
 End Namespace

@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis.Editor.Shared.Utilities;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Interactive;
 using Microsoft.CodeAnalysis.Internal.Log;
-using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Shared.TestHooks;
 using Microsoft.VisualStudio.InteractiveWindow.Commands;
 using Microsoft.VisualStudio.InteractiveWindow.Shell;
@@ -28,7 +27,6 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.Interactive
     {
         private readonly IThreadingContext _threadingContext;
         private readonly IAsynchronousOperationListener _listener;
-        private readonly IGlobalOptionService _globalOptions;
         private readonly ITextDocumentFactoryService _textDocumentFactoryService;
 
         [ImportingConstructor]
@@ -42,14 +40,12 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.Interactive
             IContentTypeRegistryService contentTypeRegistry,
             IInteractiveWindowCommandsFactory commandsFactory,
             [ImportMany] IInteractiveWindowCommand[] commands,
-            IGlobalOptionService globalOptions,
             ITextDocumentFactoryService textDocumentFactoryService,
             VisualStudioWorkspace workspace)
             : base(serviceProvider, interactiveWindowFactory, classifierAggregator, contentTypeRegistry, commandsFactory, commands, workspace)
         {
             _threadingContext = threadingContext;
             _listener = listenerProvider.GetListener(FeatureAttribute.InteractiveEvaluator);
-            _globalOptions = globalOptions;
             _textDocumentFactoryService = textDocumentFactoryService;
         }
 
@@ -57,8 +53,7 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.Interactive
 
         protected override Guid Id => CSharpVsInteractiveWindowPackage.Id;
 
-        // Note: intentionally left unlocalized (we treat these words as if they were unregistered trademarks)
-        protected override string Title => "C# Interactive";
+        protected override string Title => CSharpVSResources.CSharp_Interactive;
 
         protected override FunctionId InteractiveWindowFunctionId => FunctionId.CSharp_Interactive_Window;
 
@@ -69,7 +64,6 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.Interactive
             VisualStudioWorkspace workspace)
         {
             return new CSharpInteractiveEvaluator(
-                _globalOptions,
                 _threadingContext,
                 _listener,
                 contentTypeRegistry.GetContentType(ContentTypeNames.CSharpContentType),

@@ -2,356 +2,505 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeFixes.FixReturnType;
-using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Editor.UnitTests.CodeActions;
 using Microsoft.CodeAnalysis.Test.Utilities;
+using Microsoft.CodeAnalysis.Testing;
 using Roslyn.Test.Utilities;
 using Xunit;
-using Xunit.Abstractions;
 
-namespace Microsoft.CodeAnalysis.Editor.CSharp.UnitTests.Diagnostics.FixReturnType
-{
-    [Trait(Traits.Feature, Traits.Features.CodeActionsFixReturnType)]
-    public partial class FixReturnTypeTests : AbstractCSharpDiagnosticProviderBasedUserDiagnosticTest
-    {
-        public FixReturnTypeTests(ITestOutputHelper logger)
-             : base(logger)
-        {
-        }
+namespace Microsoft.CodeAnalysis.Editor.CSharp.UnitTests.Diagnostics.FixReturnType;
 
-        internal override (DiagnosticAnalyzer, CodeFixProvider) CreateDiagnosticProviderAndFixer(Workspace workspace)
-            => (null, new CSharpFixReturnTypeCodeFixProvider());
+using VerifyCS = CSharpCodeFixVerifier<
+    EmptyDiagnosticAnalyzer,
+    CSharpFixReturnTypeCodeFixProvider>;
 
-        [Fact]
-        public async Task Simple()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
+[Trait(Traits.Feature, Traits.Features.CodeActionsFixReturnType)]
+public class FixReturnTypeTests
 {
-    void M()
+    [Fact]
+    public async Task Simple()
     {
-        [|return|] 1;
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                void M()
+                {
+                    {|CS0127:return|} 1;
+                }
+            }
+            """, """
+            class C
+            {
+                int M()
+                {
+                    return 1;
+                }
+            }
+            """);
     }
-}",
-@"class C
-{
-    int M()
-    {
-        return 1;
-    }
-}");
-        }
 
-        [Fact]
-        public async Task Simple_WithTrivia()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    /*A*/ void /*B*/ M()
+    [Fact]
+    public async Task Simple_WithTrivia()
     {
-        [|return|] 1;
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                /*A*/ void /*B*/ M()
+                {
+                    {|CS0127:return|} 1;
+                }
+            }
+            """, """
+            class C
+            {
+                /*A*/
+                int /*B*/ M()
+                {
+                    return 1;
+                }
+            }
+            """);
+        // Note: the formatting change is introduced by Formatter.FormatAsync
     }
-}",
-@"class C
-{
-    /*A*/
-    int /*B*/ M()
-    {
-        return 1;
-    }
-}");
-            // Note: the formatting change is introduced by Formatter.FormatAsync
-        }
 
-        [Fact]
-        public async Task ReturnString()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    void M()
+    [Fact]
+    public async Task ReturnString()
     {
-        [|return|] """";
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                void M()
+                {
+                    {|CS0127:return|} "";
+                }
+            }
+            """, """
+            class C
+            {
+                string M()
+                {
+                    return "";
+                }
+            }
+            """);
     }
-}",
-@"class C
-{
-    string M()
-    {
-        return """";
-    }
-}");
-        }
 
-        [Fact]
-        public async Task ReturnNull()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    void M()
+    [Fact]
+    public async Task ReturnNull()
     {
-        [|return|] null;
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                void M()
+                {
+                    {|CS0127:return|} null;
+                }
+            }
+            """, """
+            class C
+            {
+                object M()
+                {
+                    return null;
+                }
+            }
+            """);
     }
-}",
-@"class C
-{
-    object M()
-    {
-        return null;
-    }
-}");
-        }
 
-        [Fact(Skip = "https://github.com/dotnet/roslyn/issues/33481")]
-        public async Task ReturnTypelessTuple()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    void M()
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/65302")]
+    public async Task ReturnTypelessTuple()
     {
-        [|return|] (null, string.Empty);
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                void M()
+                {
+                    {|CS0127:return|} (null, string.Empty);
+                }
+            }
+            """, """
+            class C
+            {
+                (object, string) M()
+                {
+                    return (null, string.Empty);
+                }
+            }
+            """);
     }
-}",
-@"class C
-{
-    object M()
-    {
-        return (null, string.Empty);
-    }
-}");
-        }
 
-        [Fact]
-        public async Task ReturnLambda()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    void M()
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/65302")]
+    public async Task ReturnTypelessTuple_Nested()
     {
-        [|return|] () => {};
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                void M()
+                {
+                    {|CS0127:return|} ((5, null), string.Empty);
+                }
+            }
+            """, """
+            class C
+            {
+                ((int, object), string) M()
+                {
+                    return ((5, null), string.Empty);
+                }
+            }
+            """);
     }
-}",
- @"class C
-{
-    object M()
-    {
-        return () => {};
-    }
-}");
-        }
 
-        [Fact]
-        public async Task ReturnC()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    void M()
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/65302")]
+    public async Task ReturnTypelessTuple_Async()
     {
-        [|return|] new C();
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                async void M()
+                {
+                    {|CS0127:return|} (null, string.Empty);
+                }
+            }
+            """, """
+            class C
+            {
+                async System.Threading.Tasks.Task<(object, string)> M()
+                {
+                    return (null, string.Empty);
+                }
+            }
+            """);
     }
-}",
-@"class C
-{
-    C M()
-    {
-        return new C();
-    }
-}");
-        }
 
-        [Fact]
-        public async Task ReturnString_AsyncVoid()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    async void M()
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/65302")]
+    public async Task ReturnTypelessTuple_Nested_Async()
     {
-        [|return|] """";
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                async void M()
+                {
+                    {|CS0127:return|} ((5, null), string.Empty);
+                }
+            }
+            """, """
+            class C
+            {
+                async System.Threading.Tasks.Task<((int, object), string)> M()
+                {
+                    return ((5, null), string.Empty);
+                }
+            }
+            """);
     }
-}",
-@"class C
-{
-    async System.Threading.Tasks.Task<string> M()
-    {
-        return """";
-    }
-}");
-        }
 
-        [Fact]
-        public async Task ReturnString_AsyncVoid_WithUsing()
+    [Fact]
+    public async Task ReturnLambda()
+    {
+        await new VerifyCS.Test
         {
-            await TestInRegularAndScript1Async(
-@"
-using System.Threading.Tasks;
-class C
-{
-    async void M()
-    {
-        [|return|] """";
+            TestCode = """
+                class C
+                {
+                    void M()
+                    {
+                        {|CS0127:return|} () => {};
+                    }
+                }
+                """,
+            FixedCode = """
+                class C
+                {
+                    object M()
+                    {
+                        return () => {};
+                    }
+                }
+                """,
+            LanguageVersion = LanguageVersion.CSharp10
+        }.RunAsync();
     }
-}",
-@"
-using System.Threading.Tasks;
-class C
-{
-    async Task<string> M()
-    {
-        return """";
-    }
-}");
-        }
 
-        [Fact]
-        public async Task ReturnString_AsyncTask()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    async System.Threading.Tasks.Task M()
+    [Fact]
+    public async Task ReturnC()
     {
-        [|return|] """";
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                void M()
+                {
+                    {|CS0127:return|} new C();
+                }
+            }
+            """, """
+            class C
+            {
+                C M()
+                {
+                    return new C();
+                }
+            }
+            """);
     }
-}",
-@"class C
-{
-    async System.Threading.Tasks.Task<string> M()
-    {
-        return """";
-    }
-}");
-        }
 
-        [Fact]
-        public async Task ReturnString_LocalFunction()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    void M()
+    [Fact]
+    public async Task ReturnString_AsyncVoid()
     {
-        void local()
-        {
-            [|return|] """";
-        }
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                async void M()
+                {
+                    {|CS0127:return|} "";
+                }
+            }
+            """, """
+            class C
+            {
+                async System.Threading.Tasks.Task<string> M()
+                {
+                    return "";
+                }
+            }
+            """);
     }
-}",
-@"class C
-{
-    void M()
-    {
-        string local()
-        {
-            return """";
-        }
-    }
-}");
-        }
 
-        [Fact]
-        public async Task ReturnString_AsyncVoid_LocalFunction()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    void M()
+    [Fact]
+    public async Task ReturnString_AsyncVoid_WithUsing()
     {
-        async void local()
-        {
-            [|return|] """";
-        }
-    }
-}",
-@"class C
-{
-    void M()
-    {
-        async System.Threading.Tasks.Task<string> local()
-        {
-            return """";
-        }
-    }
-}");
-        }
+        await VerifyCS.VerifyCodeFixAsync("""
+            using System.Threading.Tasks;
 
-        [Fact]
-        public async Task ExpressionBodied()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    void M() => 1[||];
-}",
-@"class C
-{
-    int M() => 1[||];
-}");
-        }
+            class C
+            {
+                async void M()
+                {
+                    {|CS0127:return|} "";
+                }
+            }
+            """, """
+            using System.Threading.Tasks;
 
-        [Fact]
-        [WorkItem(47089, "https://github.com/dotnet/roslyn/issues/47089")]
-        public async Task ExpressionAndReturnTypeAreVoid()
-        {
-            await TestMissingInRegularAndScriptAsync(
-@"class C
-{
-    void M()
-    {
-        return Console.WriteLine()[||];
+            class C
+            {
+                async Task<string> M()
+                {
+                    return "";
+                }
+            }
+            """);
     }
-}");
-        }
 
-        [Fact]
-        [WorkItem(53574, "https://github.com/dotnet/roslyn/issues/53574")]
-        public async Task TestAnonymousTypeTopLevel()
-        {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    public void Method()
+    [Fact]
+    public async Task ReturnString_AsyncTask()
     {
-        [|return|] new { A = 0, B = 1 };
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                async System.Threading.Tasks.Task M()
+                {
+                    {|CS1997:return|} "";
+                }
+            }
+            """, """
+            class C
+            {
+                async System.Threading.Tasks.Task<string> M()
+                {
+                    return "";
+                }
+            }
+            """);
     }
-}",
-@"class C
-{
-    public object Method()
-    {
-        return new { A = 0, B = 1 };
-    }
-}");
-        }
 
-        [Fact]
-        [WorkItem(53574, "https://github.com/dotnet/roslyn/issues/53574")]
-        public async Task TestAnonymousTypeTopNested()
+    [Fact]
+    public async Task ReturnString_LocalFunction()
+    {
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                void M()
+                {
+                    void local()
+                    {
+                        {|CS0127:return|} "";
+                    }
+                }
+            }
+            """, """
+            class C
+            {
+                void M()
+                {
+                    string local()
+                    {
+                        return "";
+                    }
+                }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task ReturnString_AsyncVoid_LocalFunction()
+    {
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                void M()
+                {
+                    async void local()
+                    {
+                        {|CS0127:return|} "";
+                    }
+                }
+            }
+            """, """
+            class C
+            {
+                void M()
+                {
+                    async System.Threading.Tasks.Task<string> local()
+                    {
+                        return "";
+                    }
+                }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task ExpressionBodied()
+    {
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                void M() => {|CS0201:1|};
+            }
+            """, """
+            class C
+            {
+                int M() => 1;
+            }
+            """);
+    }
+
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/47089")]
+    public async Task ExpressionAndReturnTypeAreVoid()
+    {
+        var markup = """
+            using System;
+
+            class C
+            {
+                void M()
+                {
+                    {|CS0127:return|} Console.WriteLine();
+                }
+            }
+            """;
+        await VerifyCS.VerifyCodeFixAsync(markup, markup);
+    }
+
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/53574")]
+    public async Task TestAnonymousTypeTopLevel()
+    {
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                public void Method()
+                {
+                    {|CS0127:return|} new { A = 0, B = 1 };
+                }
+            }
+            """, """
+            class C
+            {
+                public object Method()
+                {
+                    return new { A = 0, B = 1 };
+                }
+            }
+            """);
+    }
+
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/53574")]
+    public async Task TestAnonymousTypeTopNested()
+    {
+        await VerifyCS.VerifyCodeFixAsync("""
+            class C
+            {
+                public void Method()
+                {
+                    {|CS0127:return|} new[] { new { A = 0, B = 1 } };
+                }
+            }
+            """, """
+            class C
+            {
+                public object Method()
+                {
+                    return new[] { new { A = 0, B = 1 } };
+                }
+            }
+            """);
+    }
+
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/64901")]
+    public async Task ReturnString_ValueTask()
+    {
+        await new VerifyCS.Test
         {
-            await TestInRegularAndScript1Async(
-@"class C
-{
-    public void Method()
-    {
-        [|return|] new[] { new { A = 0, B = 1 } };
+            TestCode = """
+                using System.Threading.Tasks;
+            
+                class C
+                {
+                    async ValueTask M()
+                    {
+                        {|CS1997:return|} "";
+                    }
+                }
+                """,
+            FixedCode = """
+                using System.Threading.Tasks;
+            
+                class C
+                {
+                    async ValueTask<string> M()
+                    {
+                        return "";
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net60
+        }.RunAsync();
     }
-}",
-@"class C
-{
-    public object Method()
+
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/64901")]
+    public async Task ReturnString_CustomTaskType()
     {
-        return new[] { new { A = 0, B = 1 } };
-    }
-}");
-        }
+        var markup = """
+            using System.Runtime.CompilerServices;
+            
+            [AsyncMethodBuilder(typeof(C))]
+            class C
+            {
+                async C M()
+                {
+                    {|CS1997:return|} "";
+                }
+            }
+            """;
+
+        await new VerifyCS.Test
+        {
+            TestCode = markup,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net60
+        }.RunAsync();
     }
 }

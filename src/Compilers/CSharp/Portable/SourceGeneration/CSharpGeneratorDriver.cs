@@ -4,10 +4,11 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System.Linq;
-using System.ComponentModel;
+using Microsoft.CodeAnalysis.SourceGeneration;
 
 namespace Microsoft.CodeAnalysis.CSharp
 {
@@ -74,5 +75,16 @@ namespace Microsoft.CodeAnalysis.CSharp
         internal override CommonMessageProvider MessageProvider => CSharp.MessageProvider.Instance;
 
         internal override string SourceExtension => ".cs";
+
+        internal override string EmbeddedAttributeDefinition => """
+            namespace Microsoft.CodeAnalysis
+            {
+                internal sealed partial class EmbeddedAttribute : global::System.Attribute
+                {
+                }
+            }
+            """;
+
+        internal override ISyntaxHelper SyntaxHelper => CSharpSyntaxHelper.Instance;
     }
 }

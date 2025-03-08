@@ -131,6 +131,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             internal override bool IsRequired => false;
 
+            internal sealed override bool HasUnscopedRefAttribute => false;
+
             internal sealed override ObsoleteAttributeData ObsoleteAttributeData
             {
                 get { return null; }
@@ -198,6 +200,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 get { return _backingField; }
             }
+
+            internal override int TryGetOverloadResolutionPriority() => 0;
 
             public override bool Equals(Symbol obj, TypeCompareKind compareKind)
             {

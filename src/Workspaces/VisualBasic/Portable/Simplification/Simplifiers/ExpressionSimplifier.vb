@@ -31,7 +31,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Simplification.Simplifiers
             Dim memberAccessExpression = TryCast(expression, MemberAccessExpressionSyntax)
             If memberAccessExpression?.Expression?.Kind() = SyntaxKind.MeExpression Then
                 If Not MemberAccessExpressionSimplifier.Instance.ShouldSimplifyThisMemberAccessExpression(
-                    memberAccessExpression, semanticModel, options, thisExpression:=Nothing, severity:=Nothing, cancellationToken) Then
+                    memberAccessExpression, semanticModel, options, thisExpression:=Nothing, notificationOption:=Nothing, cancellationToken) Then
                     Return False
                 End If
 
@@ -198,7 +198,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Simplification.Simplifiers
                         Dim qualifiedName = DirectCast(expression, QualifiedNameSyntax)
                         Dim newLeft As ExpressionSyntax = Nothing
                         If TrySimplifyMemberAccessOrQualifiedName(qualifiedName.Left, qualifiedName.Right, semanticModel, newLeft, issueSpan) Then
-                            If Not TypeOf newLeft Is NameSyntax Then
+                            If TypeOf newLeft IsNot NameSyntax Then
                                 Contract.Fail("QualifiedName Left = " + qualifiedName.Left.ToString() + " and QualifiedName Right = " + qualifiedName.Right.ToString() + " . Left is tried to be replaced with the PredefinedType " + replacementNode.ToString())
                             End If
 

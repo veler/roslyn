@@ -6,6 +6,7 @@ Imports System.Collections.Immutable
 Imports System.Runtime.InteropServices
 Imports System.Threading
 Imports Microsoft.CodeAnalysis.PooledObjects
+Imports Microsoft.CodeAnalysis.VisualBasic.Emit
 Imports Microsoft.CodeAnalysis.VisualBasic.Symbols
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 Imports Roslyn.Utilities
@@ -31,13 +32,13 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             [Public] = CUShort(Accessibility.Public)
             AccessibilityMask = &H7
 
-            [Class] = CUShort(TYPEKIND.Class) << TypeKindShift
-            [Structure] = CUShort(TYPEKIND.Structure) << TypeKindShift
-            [Interface] = CUShort(TYPEKIND.Interface) << TypeKindShift
-            [Enum] = CUShort(TYPEKIND.Enum) << TypeKindShift
-            [Delegate] = CUShort(TYPEKIND.Delegate) << TypeKindShift
-            [Module] = CUShort(TYPEKIND.Module) << TypeKindShift
-            Submission = CUShort(TYPEKIND.Submission) << TypeKindShift
+            [Class] = CUShort(TypeKind.Class) << TypeKindShift
+            [Structure] = CUShort(TypeKind.Structure) << TypeKindShift
+            [Interface] = CUShort(TypeKind.Interface) << TypeKindShift
+            [Enum] = CUShort(TypeKind.Enum) << TypeKindShift
+            [Delegate] = CUShort(TypeKind.Delegate) << TypeKindShift
+            [Module] = CUShort(TypeKind.Module) << TypeKindShift
+            Submission = CUShort(TypeKind.Submission) << TypeKindShift
             TypeKindMask = &HF0
             TypeKindShift = 4
 
@@ -59,6 +60,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             ReportedVarianceDiagnostics = &H2    ' Set if variance diagnostics have been reported.
             ReportedBaseClassConstraintsDiagnostics = &H4    ' Set if base class constraints diagnostics have been reported.
             ReportedInterfacesConstraintsDiagnostics = &H8    ' Set if constraints diagnostics for base/implemented interfaces have been reported.
+            ReportedCodeAnalysisEmbeddedAttributeDiagnostics = &H10 ' Set if the symbol has been checked for Microsoft.CodeAnalysis.EmbeddedAttribute definition diagnostics.
         End Enum
 
         ' Containing symbol
@@ -239,7 +241,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                     ' In case Vb Core Runtime is being embedded, we should mark attribute 
                     ' 'Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute'
                     ' as being referenced if the named type just created is a module
-                    If type.TypeKind = TYPEKIND.Module Then
+                    If type.TypeKind = TypeKind.Module Then
                         type.DeclaringCompilation.EmbeddedSymbolManager.RegisterModuleDeclaration()
                     End If
 
@@ -329,7 +331,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                 Return
             End If
 
-            Dim diagnostics As DiagnosticBag = Nothing
+            Dim diagnostics = BindingDiagnosticBag.GetInstance(withDiagnostics:=True, withDependencies:=False)
             Dim infosBuffer As ArrayBuilder(Of DiagnosticInfo) = Nothing
 
             Select Case Me.TypeKind
@@ -350,11 +352,9 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             m_containingModule.AtomicSetFlagAndStoreDiagnostics(m_lazyState,
                                                                 StateFlags.ReportedVarianceDiagnostics,
                                                                 0,
-                                                                If(diagnostics IsNot Nothing, New BindingDiagnosticBag(diagnostics), Nothing))
+                                                                diagnostics)
 
-            If diagnostics IsNot Nothing Then
-                diagnostics.Free()
-            End If
+            diagnostics.Free()
 
             If infosBuffer IsNot Nothing Then
                 ' all diagnostics were reported to diagnostic bag:
@@ -363,7 +363,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             End If
         End Sub
 
-        Private Sub ReportNestingIntoVariantInterface(<[In], Out> ByRef diagnostics As DiagnosticBag)
+        Private Sub ReportNestingIntoVariantInterface(diagnostics As BindingDiagnosticBag)
             If Not _containingSymbol.IsType Then
                 Return
             End If
@@ -391,16 +391,13 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
 
             If container IsNot Nothing Then
                 Debug.Assert(container.IsInterfaceType() AndAlso container.HasVariance())
-                If diagnostics Is Nothing Then
-                    diagnostics = DiagnosticBag.GetInstance()
-                End If
 
                 diagnostics.Add(New VBDiagnostic(ErrorFactory.ErrorInfo(ERRID.ERR_VarianceInterfaceNesting), Locations(0)))
             End If
         End Sub
 
         Private Sub GenerateVarianceDiagnosticsForInterface(
-            <[In], Out> ByRef diagnostics As DiagnosticBag,
+            diagnostics As BindingDiagnosticBag,
             <[In], Out> ByRef infosBuffer As ArrayBuilder(Of DiagnosticInfo)
         )
             ' Dev10 didn't do this shortcut, but I and Lucian believe that the checks below
@@ -511,7 +508,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
         Protected MustOverride Function GetInheritsOrImplementsLocation(base As NamedTypeSymbol, getInherits As Boolean) As Location
 
         Private Sub GenerateVarianceDiagnosticsForDelegate(
-            <[In], Out> ByRef diagnostics As DiagnosticBag,
+            diagnostics As BindingDiagnosticBag,
             <[In], Out> ByRef infosBuffer As ArrayBuilder(Of DiagnosticInfo)
         )
             ' Dev10 didn't do this shortcut, but I and Lucian believe that the checks below
@@ -540,14 +537,10 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
         End Sub
 
         Private Shared Sub ReportDiagnostics(
-            <[In], Out> ByRef diagnostics As DiagnosticBag,
+            diagnostics As BindingDiagnosticBag,
             location As Location,
             infos As ArrayBuilder(Of DiagnosticInfo)
         )
-            If diagnostics Is Nothing Then
-                diagnostics = DiagnosticBag.GetInstance()
-            End If
-
             For Each info In infos
                 diagnostics.Add(info, location)
             Next
@@ -960,7 +953,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
 
         Private Sub GenerateVarianceDiagnosticsForMethod(
             method As MethodSymbol,
-            <[In], Out> ByRef diagnostics As DiagnosticBag,
+            diagnostics As BindingDiagnosticBag,
             <[In], Out> ByRef infosBuffer As ArrayBuilder(Of DiagnosticInfo)
         )
             Debug.Assert(Not HaveDiagnostics(infosBuffer))
@@ -999,7 +992,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
 
         Private Sub GenerateVarianceDiagnosticsForParameters(
             parameters As ImmutableArray(Of ParameterSymbol),
-            <[In], Out> ByRef diagnostics As DiagnosticBag,
+            diagnostics As BindingDiagnosticBag,
             <[In], Out> ByRef infosBuffer As ArrayBuilder(Of DiagnosticInfo)
         )
             Debug.Assert(Not HaveDiagnostics(infosBuffer))
@@ -1035,7 +1028,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
 
         Private Sub GenerateVarianceDiagnosticsForConstraints(
             parameters As ImmutableArray(Of TypeParameterSymbol),
-            <[In], Out> ByRef diagnostics As DiagnosticBag,
+            diagnostics As BindingDiagnosticBag,
             <[In], Out> ByRef infosBuffer As ArrayBuilder(Of DiagnosticInfo)
         )
             Debug.Assert(Not HaveDiagnostics(infosBuffer))
@@ -1068,7 +1061,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
 
         Private Sub GenerateVarianceDiagnosticsForProperty(
             [property] As PropertySymbol,
-            <[In], Out> ByRef diagnostics As DiagnosticBag,
+            diagnostics As BindingDiagnosticBag,
             <[In], Out> ByRef infosBuffer As ArrayBuilder(Of DiagnosticInfo)
         )
             Debug.Assert(Not HaveDiagnostics(infosBuffer))
@@ -1108,7 +1101,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
 
         Private Sub GenerateVarianceDiagnosticsForEvent(
             [event] As EventSymbol,
-            <[In], Out> ByRef diagnostics As DiagnosticBag,
+            diagnostics As BindingDiagnosticBag,
             <[In], Out> ByRef infosBuffer As ArrayBuilder(Of DiagnosticInfo)
         )
             Debug.Assert(Not HaveDiagnostics(infosBuffer))
@@ -1264,9 +1257,9 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             End Get
         End Property
 
-        Public Overrides ReadOnly Property TypeKind As TYPEKIND
+        Public Overrides ReadOnly Property TypeKind As TypeKind
             Get
-                Return CType((_flags And SourceTypeFlags.TypeKindMask) >> CUInt(SourceTypeFlags.TypeKindShift), TYPEKIND)
+                Return CType((_flags And SourceTypeFlags.TypeKindMask) >> CUInt(SourceTypeFlags.TypeKindShift), TypeKind)
             End Get
         End Property
 
@@ -1623,7 +1616,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                 Return s_emptyTypeMembers
             End If
 
-            Return children.Select(Function(decl) CreateNestedType(decl)).ToDictionary(
+            Return children.Select(Function(decl) CreateNestedType(decl)).ToMultiDictionary(
                 Function(decl) decl.Name,
                 IdentifierComparison.Comparer)
         End Function
@@ -1810,9 +1803,8 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                             Dim candidateLocation As Location = candidate.NonMergedLocation
                             Debug.Assert(candidateLocation IsNot Nothing)
 
-                            If partialMethods.Contains(candidate) Then
+                            If partialMethods.Remove(candidate) Then
                                 '  partial-partial conflict
-                                partialMethods.Remove(candidate)
 
                                 '  the 'best' partial method is the one with the 'smallest' 
                                 ' location, we should report errors on the other
@@ -2031,16 +2023,23 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             ''' <summary> Set of processed structure types </summary>
             Public ReadOnly ProcessedTypes As HashSet(Of NamedTypeSymbol)
 
+            Public ReadOnly TypesWithCycle As HashSet(Of NamedTypeSymbol)
+
             ''' <summary> Queue element structure </summary>
             Public Structure QueueElement
                 Public ReadOnly Type As NamedTypeSymbol
-                Public ReadOnly Path As ConsList(Of FieldSymbol)
+                Public ReadOnly FieldPath As ConsList(Of FieldSymbol)
+                Public ReadOnly ContainingDefinitionsPath As ConsList(Of NamedTypeSymbol)
+                Public ReadOnly Report As Boolean
 
-                Public Sub New(type As NamedTypeSymbol, path As ConsList(Of FieldSymbol))
+                Public Sub New(type As NamedTypeSymbol, fieldPath As ConsList(Of FieldSymbol), containingDefinitionsPath As ConsList(Of NamedTypeSymbol), report As Boolean)
                     Debug.Assert(type IsNot Nothing)
-                    Debug.Assert(path IsNot Nothing)
+                    Debug.Assert(fieldPath IsNot Nothing)
+                    Debug.Assert(containingDefinitionsPath IsNot Nothing)
                     Me.Type = type
-                    Me.Path = path
+                    Me.FieldPath = fieldPath
+                    Me.ContainingDefinitionsPath = containingDefinitionsPath
+                    Me.Report = report
                 End Sub
             End Structure
 
@@ -2049,6 +2048,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
 
             Private Sub New()
                 ProcessedTypes = New HashSet(Of NamedTypeSymbol)()
+                TypesWithCycle = New HashSet(Of NamedTypeSymbol)()
                 Queue = New Queue(Of QueueElement)
             End Sub
 
@@ -2059,6 +2059,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             Public Sub Free()
                 Me.Queue.Clear()
                 Me.ProcessedTypes.Clear()
+                Me.TypesWithCycle.Clear()
                 s_pool.Free(Me)
             End Sub
 
@@ -2100,7 +2101,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
 
             '  Allocate data set
             Dim data = StructureCircularityDetectionDataSet.GetInstance()
-            data.Queue.Enqueue(New StructureCircularityDetectionDataSet.QueueElement(Me, ConsList(Of FieldSymbol).Empty))
+            data.Queue.Enqueue(New StructureCircularityDetectionDataSet.QueueElement(Me, ConsList(Of FieldSymbol).Empty, ConsList(Of NamedTypeSymbol).Empty.Prepend(Me), report:=True))
 
             Dim hasCycle = False
 
@@ -2110,6 +2111,10 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                     Dim current = data.Queue.Dequeue()
                     If Not data.ProcessedTypes.Add(current.Type) Then
                         ' In some cases the queue may contain two same types which are not processed yet
+                        Continue While
+                    End If
+
+                    If data.TypesWithCycle.Contains(current.Type.OriginalDefinition) Then
                         Continue While
                     End If
 
@@ -2130,13 +2135,15 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                                     Continue For
                                 End If
 
-                                If fieldType.OriginalDefinition.Equals(Me) Then
+                                If current.ContainingDefinitionsPath.ContainsReference(fieldType.OriginalDefinition) Then
                                     '  a cycle detected
 
-                                    If Not cycleReportedForCurrentType Then
+                                    data.TypesWithCycle.Add(fieldType.OriginalDefinition)
+
+                                    If current.Report AndAlso Not cycleReportedForCurrentType AndAlso fieldType.OriginalDefinition.Equals(Me) Then
 
                                         '  the cycle includes 'current.Path' and ends with 'field'; the order is reversed in the list
-                                        Dim cycleFields = New ConsList(Of FieldSymbol)(field, current.Path)
+                                        Dim cycleFields = New ConsList(Of FieldSymbol)(field, current.FieldPath)
 
                                         '  generate a message info
                                         Dim diagnosticInfos = ArrayBuilder(Of DiagnosticInfo).GetInstance()
@@ -2167,18 +2174,8 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                                         hasCycle = True
                                     End If
 
-                                ElseIf Not data.ProcessedTypes.Contains(fieldType) Then
+                                ElseIf Not data.ProcessedTypes.Contains(fieldType) AndAlso Not data.TypesWithCycle.Contains(fieldType.OriginalDefinition) Then
                                     ' Add to the queue if we don't know yet if it was processed
-
-                                    If Not fieldType.IsDefinition Then
-                                        ' Types constructed from generic types are considered to be a separate types. We never report 
-                                        ' errors on such types. We also process only fields actually changed compared to original generic type.
-                                        data.Queue.Enqueue(New StructureCircularityDetectionDataSet.QueueElement(
-                                                fieldType, New ConsList(Of FieldSymbol)(field, current.Path)))
-
-                                        ' The original Generic type is added using regular rules (see next note).
-                                        fieldType = fieldType.OriginalDefinition
-                                    End If
 
                                     ' NOTE: we want to make sure we report the same error for the same types 
                                     '       consistently and don't depend on the call order; this solution uses
@@ -2189,14 +2186,29 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                                     '           (b) thus, this analysis only considers the cycles consisting of the 
                                     '               types which are 'bigger' than 'structBeingAnalyzed' because we will not 
                                     '               report the error regarding this cycle for this type anyway
-                                    Dim stepIntoType As Boolean = DetectTypeCircularity_ShouldStepIntoType(fieldType)
-                                    If stepIntoType Then
+                                    Dim stepIntoType As Boolean = DetectTypeCircularity_ShouldStepIntoType(fieldType.OriginalDefinition)
+
+                                    If stepIntoType OrElse Not fieldType.IsDefinition Then
                                         '  enqueue to be processed
+                                        ' First, visit type as a definition in order to detect the fact that it itself has a cycle.
+                                        ' This prevents us from going into an infinite generic expansion while visiting constructed form
+                                        ' of the type below.
                                         data.Queue.Enqueue(New StructureCircularityDetectionDataSet.QueueElement(
-                                                fieldType, New ConsList(Of FieldSymbol)(field, current.Path)))
+                                                fieldType.OriginalDefinition, New ConsList(Of FieldSymbol)(field, current.FieldPath),
+                                                current.ContainingDefinitionsPath.Prepend(fieldType.OriginalDefinition),
+                                                report:=stepIntoType))
                                     Else
                                         '  should not process 
                                         data.ProcessedTypes.Add(fieldType)
+                                    End If
+
+                                    If Not fieldType.IsDefinition Then
+                                        ' Types constructed from generic types are considered to be a separate types. We never report 
+                                        ' errors on such types. We also process only fields actually changed compared to original generic type.
+                                        data.Queue.Enqueue(New StructureCircularityDetectionDataSet.QueueElement(
+                                                fieldType, New ConsList(Of FieldSymbol)(field, current.FieldPath),
+                                                current.ContainingDefinitionsPath,
+                                                report:=True))
                                     End If
                                 End If
                             End If
@@ -2333,7 +2345,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                 End If
             End If
         End Sub
-
 
         ''' <summary>
         ''' Returns true if at least one of the elements of this list needs to be injected into a 
@@ -2662,7 +2673,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                     If propertySymbol.IsAutoProperty AndAlso
                         propertySymbol.ContainingType.TypeKind = TypeKind.Structure Then
 
-                        binder.ReportDiagnostic(diagBag, syntax.Identifier, ERRID.ERR_AutoPropertyInitializedInStructure)
+                        Binder.ReportDiagnostic(diagBag, syntax.Identifier, ERRID.ERR_AutoPropertyInitializedInStructure)
                     End If
 
                     AddInitializer(instanceInitializers, initializer, members.InstanceSyntaxLength)
@@ -2779,7 +2790,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                     Return ' already have an instance|shared constructor. Don't add another one.
                 End If
             End If
-
 
             ' Add a new instance|shared constructor.
             Dim syntaxRef = SyntaxReferences.First() ' use arbitrary part
@@ -2913,7 +2923,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                 AddMember(eventSymbol.AssociatedField, binder, members, omitDiagnostics:=False)
             End If
         End Sub
-
 
         Private Sub CheckMemberDiagnostics(
                              members As MembersAndInitializersBuilder,
@@ -3488,7 +3497,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             Debug.Assert(Me.IsDefinition) ' Don't do this on constructed types
 
             ' Enums and Delegates have nothing to do.
-            Dim myTypeKind As TYPEKIND = Me.TypeKind
+            Dim myTypeKind As TypeKind = Me.TypeKind
             Dim operatorsKnownToHavePair As HashSet(Of MethodSymbol) = Nothing
 
             If myTypeKind = TypeKind.Class OrElse myTypeKind = TypeKind.Interface OrElse myTypeKind = TypeKind.Structure OrElse myTypeKind = TypeKind.Module Then
@@ -4026,8 +4035,8 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             End Get
         End Property
 
-        Friend Overrides Sub AddSynthesizedAttributes(compilationState As ModuleCompilationState, ByRef attributes As ArrayBuilder(Of SynthesizedAttributeData))
-            MyBase.AddSynthesizedAttributes(compilationState, attributes)
+        Friend Overrides Sub AddSynthesizedAttributes(moduleBuilder As PEModuleBuilder, ByRef attributes As ArrayBuilder(Of VisualBasicAttributeData))
+            MyBase.AddSynthesizedAttributes(moduleBuilder, attributes)
 
             If EmitExtensionAttribute Then
                 AddSynthesizedAttribute(attributes, Me.DeclaringCompilation.SynthesizeExtensionAttribute())
@@ -4042,6 +4051,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                 End If
 
                 Return Me._lazyAnyMemberHasAttributes.Value()
+            End Get
+        End Property
+
+        Friend NotOverridable Overrides ReadOnly Property HasAnyDeclaredRequiredMembers As Boolean
+            Get
+                Return False
             End Get
         End Property
     End Class

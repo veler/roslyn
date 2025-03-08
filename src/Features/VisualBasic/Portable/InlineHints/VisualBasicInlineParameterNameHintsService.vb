@@ -6,7 +6,7 @@ Imports System.Composition
 Imports System.Threading
 Imports Microsoft.CodeAnalysis.Host.Mef
 Imports Microsoft.CodeAnalysis.InlineHints
-Imports Microsoft.CodeAnalysis.LanguageServices
+Imports Microsoft.CodeAnalysis.LanguageService
 Imports Microsoft.CodeAnalysis.Options
 Imports Microsoft.CodeAnalysis.PooledObjects
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
@@ -25,7 +25,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.InlineHints
                 semanticModel As SemanticModel,
                 syntaxFacts As ISyntaxFactsService,
                 node As SyntaxNode,
-                buffer As ArrayBuilder(Of (position As Integer, identifierArgument As String, parameter As IParameterSymbol, kind As HintKind)),
+                buffer As ArrayBuilder(Of (position As Integer, argument As SyntaxNode, parameter As IParameterSymbol, kind As HintKind)),
                 cancellationToken As CancellationToken)
 
             Dim argumentList = TryCast(node, ArgumentListSyntax)
@@ -47,17 +47,17 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.InlineHints
                     Continue For
                 End If
 
-                Dim parameter = argument.DetermineParameter(semanticModel, allowParamArray:=False, cancellationToken)
+                Dim parameter = argument.DetermineParameter(semanticModel, allowParamArray:=False, cancellationToken:=cancellationToken)
                 If String.IsNullOrEmpty(parameter?.Name) Then
                     Continue For
                 End If
 
                 Dim argumentIdentifier = GetIdentifierNameFromArgument(argument, syntaxFacts)
-                buffer.Add((argument.Span.Start, argumentIdentifier, parameter, GetKind(argument.Expression)))
+                buffer.Add((argument.Span.Start, argument, parameter, GetKind(argument.Expression)))
             Next
         End Sub
 
-        Private Function GetKind(arg As ExpressionSyntax) As HintKind
+        Private Shared Function GetKind(arg As ExpressionSyntax) As HintKind
             If TypeOf arg Is LiteralExpressionSyntax OrElse
                TypeOf arg Is InterpolatedStringExpressionSyntax Then
                 Return HintKind.Literal

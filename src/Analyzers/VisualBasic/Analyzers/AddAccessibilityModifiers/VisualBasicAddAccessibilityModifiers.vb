@@ -2,24 +2,25 @@
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
 
-Imports Microsoft.CodeAnalysis.AddAccessibilityModifiers
+Imports Microsoft.CodeAnalysis.AddOrRemoveAccessibilityModifiers
 Imports Microsoft.CodeAnalysis.CodeStyle
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 
-Namespace Microsoft.CodeAnalysis.VisualBasic.AddAccessibilityModifiers
-    Friend Class VisualBasicAddAccessibilityModifiers
-        Inherits AbstractAddAccessibilityModifiers(Of StatementSyntax)
+Namespace Microsoft.CodeAnalysis.VisualBasic.AddOrRemoveAccessibilityModifiers
+    Friend Class VisualBasicAddOrRemoveAccessibilityModifiers
+        Inherits AbstractAddOrRemoveAccessibilityModifiers(Of StatementSyntax)
 
-        Public Shared ReadOnly Instance As New VisualBasicAddAccessibilityModifiers()
+        Public Shared ReadOnly Instance As New VisualBasicAddOrRemoveAccessibilityModifiers()
 
         Protected Sub New()
         End Sub
 
         Public Overrides Function ShouldUpdateAccessibilityModifier(
-                accessibilityFacts As CodeAnalysis.LanguageServices.IAccessibilityFacts,
+                accessibilityFacts As CodeAnalysis.LanguageService.IAccessibilityFacts,
                 member As StatementSyntax,
                 [option] As AccessibilityModifiersRequired,
-                ByRef name As SyntaxToken) As Boolean
+                ByRef name As SyntaxToken,
+                ByRef modifiedAdded As Boolean) As Boolean
 
             ' Have to have a name to report the issue on.
             name = member.GetNameToken()
@@ -38,6 +39,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.AddAccessibilityModifiers
             ' Omit will flag any accesibility values that exist and are default
             ' The other options will remove or ignore accessibility
             Dim isOmit = [option] = AccessibilityModifiersRequired.OmitIfDefault
+            modifiedAdded = Not isOmit
 
             If isOmit Then
                 If Accessibility = Accessibility.NotApplicable Then

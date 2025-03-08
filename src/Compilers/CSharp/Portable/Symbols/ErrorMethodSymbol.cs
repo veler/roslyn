@@ -216,7 +216,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return false;
         }
 
-        internal sealed override bool IsMetadataVirtual(bool ignoreInterfaceImplementationChanges = false)
+        internal sealed override bool IsMetadataVirtual(IsMetadataVirtualOption option = IsMetadataVirtualOption.None)
         {
             return false;
         }
@@ -241,7 +241,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         public override bool AreLocalsZeroed
         {
-            get { throw ExceptionUtilities.Unreachable; }
+            get { throw ExceptionUtilities.Unreachable(); }
         }
 
         internal sealed override MarshalPseudoCustomAttributeData ReturnValueMarshallingInformation
@@ -261,12 +261,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override IEnumerable<Cci.SecurityAttribute> GetSecurityInformation()
         {
-            throw ExceptionUtilities.Unreachable;
+            throw ExceptionUtilities.Unreachable();
         }
 
         internal override int CalculateLocalSyntaxOffset(int localPosition, SyntaxTree localTree)
         {
-            throw ExceptionUtilities.Unreachable;
+            throw ExceptionUtilities.Unreachable();
         }
 
         internal override bool GenerateDebugInfo
@@ -283,6 +283,21 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 Debug.Assert(MethodKind == MethodKind.Constructor);
                 return false;
             }
+        }
+
+        internal sealed override bool HasUnscopedRefAttribute => false;
+
+        internal sealed override bool UseUpdatedEscapeRules => false;
+
+        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol builderArgument)
+        {
+            builderArgument = null;
+            return false;
+        }
+
+        internal sealed override int TryGetOverloadResolutionPriority()
+        {
+            return 0;
         }
     }
 }

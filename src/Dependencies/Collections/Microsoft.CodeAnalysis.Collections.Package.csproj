@@ -2,7 +2,8 @@
 <!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(NetRoslyn);netstandard2.0</TargetFrameworks>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <DebugType>none</DebugType>
     <GenerateDependencyFile>false</GenerateDependencyFile>
@@ -20,11 +21,7 @@
     <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <!-- ⚠ Consuming projects outside dotnet/roslyn will be required to manually reproduce the APIs for any linked files added here -->
-    <Compile Include="..\..\Compilers\Core\Portable\InternalUtilities\NullableAttributes.cs" Link="NullableAttributes.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+    <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Internal\Strings.resx" GenerateSource="true" ClassName="Microsoft.CodeAnalysis.Collections.Internal.SR" />
@@ -45,11 +42,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <_File Remove="@(_File)"/>
+      <_File Remove="@(_File)" />
       <_File Include="$(MSBuildProjectDirectory)\**\*.resx" TargetDir="contentFiles/$(_LanguageDirName)/$(TargetFramework)" BuildAction="EmbeddedResource" />
       <_File Include="$(MSBuildProjectDirectory)\**\*.xlf" TargetDir="contentFiles/$(_LanguageDirName)/$(TargetFramework)" BuildAction="None" />
 
-      <TfmSpecificPackageFile Include="@(_File)" PackagePath="%(_File.TargetDir)/%(_File.RecursiveDir)%(_File.FileName)%(_File.Extension)"/>
+      <TfmSpecificPackageFile Include="@(_File)" PackagePath="%(_File.TargetDir)/%(_File.RecursiveDir)%(_File.FileName)%(_File.Extension)" />
     </ItemGroup>
   </Target>
+
+  <Import Project="..\Contracts\Microsoft.CodeAnalysis.Contracts.projitems" Label="Shared" />
 </Project>

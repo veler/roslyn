@@ -2,75 +2,52 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Immutable;
-using Microsoft.CodeAnalysis.AddAccessibilityModifiers;
+using Microsoft.CodeAnalysis.AddOrRemoveAccessibilityModifiers;
 using Microsoft.CodeAnalysis.CodeStyle;
-using Microsoft.CodeAnalysis.CSharp.Extensions;
-using Microsoft.CodeAnalysis.CSharp.LanguageServices;
+using Microsoft.CodeAnalysis.CSharp.LanguageService;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Shared.Extensions;
+using Microsoft.CodeAnalysis.LanguageService;
 
-namespace Microsoft.CodeAnalysis.CSharp.AddAccessibilityModifiers
+namespace Microsoft.CodeAnalysis.CSharp.AddOrRemoveAccessibilityModifiers;
+
+[DiagnosticAnalyzer(LanguageNames.CSharp)]
+internal sealed class CSharpAddOrRemoveAccessibilityModifiersDiagnosticAnalyzer
+    : AbstractAddOrRemoveAccessibilityModifiersDiagnosticAnalyzer<CompilationUnitSyntax>
 {
-    [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal class CSharpAddAccessibilityModifiersDiagnosticAnalyzer
-        : AbstractAddAccessibilityModifiersDiagnosticAnalyzer<CompilationUnitSyntax>
+    protected override IAccessibilityFacts AccessibilityFacts => CSharpAccessibilityFacts.Instance;
+    protected override IAddOrRemoveAccessibilityModifiers AddOrRemoveAccessibilityModifiers => CSharpAddOrRemoveAccessibilityModifiers.Instance;
+
+    protected override void ProcessCompilationUnit(
+        SyntaxTreeAnalysisContext context,
+        CodeStyleOption2<AccessibilityModifiersRequired> option, CompilationUnitSyntax compilationUnit)
     {
-        protected override void ProcessCompilationUnit(
-            SyntaxTreeAnalysisContext context,
-            CodeStyleOption2<AccessibilityModifiersRequired> option, CompilationUnitSyntax compilationUnit)
-        {
-            ProcessMembers(context, option, compilationUnit.Members);
-        }
+        ProcessMembers(context, option, compilationUnit.Members);
+    }
 
-        private void ProcessMembers(
-            SyntaxTreeAnalysisContext context,
-            CodeStyleOption2<AccessibilityModifiersRequired> option,
-            SyntaxList<MemberDeclarationSyntax> members)
-        {
-            foreach (var memberDeclaration in members)
-                ProcessMemberDeclaration(context, option, memberDeclaration);
-        }
+    private void ProcessMembers(
+        SyntaxTreeAnalysisContext context,
+        CodeStyleOption2<AccessibilityModifiersRequired> option,
+        SyntaxList<MemberDeclarationSyntax> members)
+    {
+        foreach (var memberDeclaration in members)
+            ProcessMemberDeclaration(context, option, memberDeclaration);
+    }
 
-        private void ProcessMemberDeclaration(
-            SyntaxTreeAnalysisContext context,
-            CodeStyleOption2<AccessibilityModifiersRequired> option, MemberDeclarationSyntax member)
-        {
-            if (member is BaseNamespaceDeclarationSyntax namespaceDeclaration)
-                ProcessMembers(context, option, namespaceDeclaration.Members);
+    private void ProcessMemberDeclaration(
+        SyntaxTreeAnalysisContext context,
+        CodeStyleOption2<AccessibilityModifiersRequired> option, MemberDeclarationSyntax member)
+    {
+        if (!context.ShouldAnalyzeSpan(member.Span))
+            return;
 
-            // If we have a class or struct, recurse inwards.
-            if (member.IsKind(SyntaxKind.ClassDeclaration, out TypeDeclarationSyntax? typeDeclaration) ||
-                member.IsKind(SyntaxKind.StructDeclaration, out typeDeclaration) ||
-                member.IsKind(SyntaxKind.RecordDeclaration, out typeDeclaration) ||
-                member.IsKind(SyntaxKind.RecordStructDeclaration, out typeDeclaration))
-            {
-                ProcessMembers(context, option, typeDeclaration.Members);
-            }
+        if (member is BaseNamespaceDeclarationSyntax namespaceDeclaration)
+            ProcessMembers(context, option, namespaceDeclaration.Members);
 
-#if false
-            // Add this once we have the language version for C# that supports accessibility
-            // modifiers on interface methods.
-            if (option.Value == AccessibilityModifiersRequired.Always &&
-                member.IsKind(SyntaxKind.InterfaceDeclaration, out typeDeclaration))
-            {
-                // Only recurse into an interface if the user wants accessibility modifiers on 
-                ProcessTypeDeclaration(context, generator, option, typeDeclaration);
-            }
-#endif
+        // If we have a class or struct, recurse inwards.
+        if (member is TypeDeclarationSyntax typeDeclaration)
+            ProcessMembers(context, option, typeDeclaration.Members);
 
-            if (!CSharpAddAccessibilityModifiers.Instance.ShouldUpdateAccessibilityModifier(CSharpAccessibilityFacts.Instance, member, option.Value, out var name))
-                return;
-
-            // Have an issue to flag, either add or remove. Report issue to user.
-            var additionalLocations = ImmutableArray.Create(member.GetLocation());
-            context.ReportDiagnostic(DiagnosticHelper.Create(
-                Descriptor,
-                name.GetLocation(),
-                option.Notification.Severity,
-                additionalLocations: additionalLocations,
-                properties: null));
-        }
+        CheckMemberAndReportDiagnostic(context, option, member);
     }
 }

@@ -17,7 +17,7 @@ Namespace Microsoft.CodeAnalysis.Editor.VisualBasic.EndConstructGeneration
         Private ReadOnly _newCaretPosition As Integer?
 
         Public Sub New(snapshotSpan As SnapshotSpan, replacementText As String, newCaretPosition As Integer?)
-            ThrowIfNull(replacementText)
+            Contract.ThrowIfNull(replacementText)
 
             _snapshotSpan = snapshotSpan
             _replacementText = replacementText
@@ -37,12 +37,7 @@ Namespace Microsoft.CodeAnalysis.Editor.VisualBasic.EndConstructGeneration
                 Return
             End If
 
-            Dim oldSolution = document.Project.Solution.Workspace.CurrentSolution
-            Dim newSolution = oldSolution.UpdateDocument(
-                document.Id, SpecializedCollections.SingletonEnumerable(
-                    New TextChange(_snapshotSpan.TranslateTo(current, SpanTrackingMode.EdgeExclusive).Span.ToTextSpan(), _replacementText)), CancellationToken.None)
-
-            oldSolution.Workspace.TryApplyChanges(newSolution)
+            subjectBuffer.ApplyChange(New TextChange(_snapshotSpan.TranslateTo(current, SpanTrackingMode.EdgeExclusive).Span.ToTextSpan(), _replacementText))
 
             Dim startPoint = _snapshotSpan.Start.TranslateTo(subjectBuffer.CurrentSnapshot, PointTrackingMode.Negative)
             If _newCaretPosition IsNot Nothing Then

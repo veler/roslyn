@@ -8,7 +8,7 @@ namespace Microsoft.CodeAnalysis.ExternalAccess.Razor
 {
     internal static class RazorPredefinedCodeFixProviderNames
     {
-        public static string AddAccessibilityModifiers => PredefinedCodeFixProviderNames.AddAccessibilityModifiers;
+        public static string AddAccessibilityModifiers => PredefinedCodeFixProviderNames.AddOrRemoveAccessibilityModifiers;
         public static string AddAnonymousTypeMemberName => PredefinedCodeFixProviderNames.AddAnonymousTypeMemberName;
         public static string AddAsync => PredefinedCodeFixProviderNames.AddAsync;
         public static string AddBraces => PredefinedCodeFixProviderNames.AddBraces;
@@ -109,8 +109,8 @@ namespace Microsoft.CodeAnalysis.ExternalAccess.Razor
         public static string UpdateProjectToAllowUnsafe => PredefinedCodeFixProviderNames.UpdateProjectToAllowUnsafe;
         public static string UpgradeProject => PredefinedCodeFixProviderNames.UpgradeProject;
         public static string UseAutoProperty => PredefinedCodeFixProviderNames.UseAutoProperty;
-        public static string UseCoalesceExpression => PredefinedCodeFixProviderNames.UseCoalesceExpression;
-        public static string UseCoalesceExpressionForNullable => PredefinedCodeFixProviderNames.UseCoalesceExpressionForNullable;
+        public static string UseCoalesceExpression => PredefinedCodeFixProviderNames.UseCoalesceExpressionForTernaryConditionalCheck;
+        public static string UseCoalesceExpressionForNullable => PredefinedCodeFixProviderNames.UseCoalesceExpressionForNullableTernaryConditionalCheck;
         public static string UseCollectionInitializer => PredefinedCodeFixProviderNames.UseCollectionInitializer;
         public static string UseCompoundAssignment => PredefinedCodeFixProviderNames.UseCompoundAssignment;
         public static string UseCompoundCoalesceAssignment => PredefinedCodeFixProviderNames.UseCompoundCoalesceAssignment;

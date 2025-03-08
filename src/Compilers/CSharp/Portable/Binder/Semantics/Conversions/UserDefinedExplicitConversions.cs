@@ -33,7 +33,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             // SPEC: Find the set of types D from which user-defined conversion operators
             // SPEC: will be considered...
-            var d = ArrayBuilder<TypeSymbol>.GetInstance();
+            var d = ArrayBuilder<(NamedTypeSymbol ParticipatingType, TypeParameterSymbol ConstrainedToTypeOpt)>.GetInstance();
             ComputeUserDefinedExplicitConversionTypeSet(source, target, d, ref useSiteInfo);
 
             // SPEC: Find the set of applicable user-defined and lifted conversion operators, U...
@@ -71,7 +71,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return UserDefinedConversionResult.Valid(u, best.Value);
         }
 
-        private static void ComputeUserDefinedExplicitConversionTypeSet(TypeSymbol source, TypeSymbol target, ArrayBuilder<TypeSymbol> d, ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo)
+        private static void ComputeUserDefinedExplicitConversionTypeSet(TypeSymbol source, TypeSymbol target, ArrayBuilder<(NamedTypeSymbol ParticipatingType, TypeParameterSymbol ConstrainedToTypeOpt)> d, ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo)
         {
             // Spec 6.4.5: User-defined explicit conversions
             //   Find the set of types, D, from which user-defined conversion operators will be considered. 
@@ -87,7 +87,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             TypeSymbol source,
             TypeSymbol target,
             bool isChecked,
-            ArrayBuilder<TypeSymbol> d,
+            ArrayBuilder<(NamedTypeSymbol ParticipatingType, TypeParameterSymbol ConstrainedToTypeOpt)> d,
             ArrayBuilder<UserDefinedConversionAnalysis> u,
             ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo)
         {
@@ -97,30 +97,29 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(d != null);
             Debug.Assert(u != null);
 
-            HashSet<NamedTypeSymbol> lookedInInterfaces = null;
+            bool haveInterfaces = false;
 
-            foreach (TypeSymbol declaringType in d)
+            foreach ((NamedTypeSymbol declaringType, TypeParameterSymbol constrainedToTypeOpt) in d)
             {
-                if (declaringType is TypeParameterSymbol typeParameter)
+                if (declaringType.IsInterface)
                 {
-                    ImmutableArray<NamedTypeSymbol> interfaceTypes = typeParameter.AllEffectiveInterfacesWithDefinitionUseSiteDiagnostics(ref useSiteInfo);
-
-                    if (!interfaceTypes.IsEmpty)
-                    {
-                        lookedInInterfaces ??= new HashSet<NamedTypeSymbol>(Symbols.SymbolEqualityComparer.AllIgnoreOptions); // Equivalent to has identity conversion check
-
-                        foreach (var interfaceType in interfaceTypes)
-                        {
-                            if (lookedInInterfaces.Add(interfaceType))
-                            {
-                                addCandidatesFromType(constrainedToTypeOpt: typeParameter, interfaceType, sourceExpression, source, target, isChecked: isChecked, u, ref useSiteInfo);
-                            }
-                        }
-                    }
+                    Debug.Assert(constrainedToTypeOpt is not null);
+                    haveInterfaces = true;
                 }
                 else
                 {
-                    addCandidatesFromType(constrainedToTypeOpt: null, (NamedTypeSymbol)declaringType, sourceExpression, source, target, isChecked: isChecked, u, ref useSiteInfo);
+                    addCandidatesFromType(constrainedToTypeOpt: null, declaringType, sourceExpression, source, target, isChecked: isChecked, u, ref useSiteInfo);
+                }
+            }
+
+            if (u.Count == 0 && haveInterfaces)
+            {
+                foreach ((NamedTypeSymbol declaringType, TypeParameterSymbol constrainedToTypeOpt) in d)
+                {
+                    if (declaringType.IsInterface)
+                    {
+                        addCandidatesFromType(constrainedToTypeOpt: constrainedToTypeOpt, declaringType, sourceExpression, source, target, isChecked: isChecked, u, ref useSiteInfo);
+                    }
                 }
             }
 
@@ -213,31 +212,38 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return;
             }
 
-            ImmutableArray<MethodSymbol> operators = declaringType.GetOperators(
-                isExplicit ? (isChecked ? WellKnownMemberNames.CheckedExplicitConversionName : WellKnownMemberNames.ExplicitConversionName) : WellKnownMemberNames.ImplicitConversionName);
+            if (IgnoreUserDefinedSpanConversions(source, target))
+            {
+                return;
+            }
 
-            var candidates = ArrayBuilder<MethodSymbol>.GetInstance(operators.Length);
-            candidates.AddRange(operators);
+            var operators = ArrayBuilder<MethodSymbol>.GetInstance();
+            declaringType.AddOperators(
+                isExplicit ? (isChecked ? WellKnownMemberNames.CheckedExplicitConversionName : WellKnownMemberNames.ExplicitConversionName) : WellKnownMemberNames.ImplicitConversionName,
+                operators);
 
             if (isExplicit && isChecked)
             {
-                ImmutableArray<MethodSymbol> operators2 = declaringType.GetOperators(WellKnownMemberNames.ExplicitConversionName);
-
                 // Add regular operators as well.
                 if (operators.IsEmpty)
                 {
-                    candidates.AddRange(operators2);
+                    declaringType.AddOperators(WellKnownMemberNames.ExplicitConversionName, operators);
                 }
                 else
                 {
+                    var originalOperatorCount = operators.Count;
+
+                    var operators2 = ArrayBuilder<MethodSymbol>.GetInstance();
+                    declaringType.AddOperators(WellKnownMemberNames.ExplicitConversionName, operators2);
+
                     foreach (MethodSymbol op2 in operators2)
                     {
                         // Drop operators that have a match among the checked ones.
                         bool add = true;
 
-                        foreach (MethodSymbol op in operators)
+                        for (var i = 0; i < originalOperatorCount; i++)
                         {
-                            if (SourceMemberContainerTypeSymbol.DoOperatorsPair(op, op2))
+                            if (SourceMemberContainerTypeSymbol.DoOperatorsPair(operators[i], op2))
                             {
                                 add = false;
                                 break;
@@ -246,13 +252,15 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                         if (add)
                         {
-                            candidates.Add(op2);
+                            operators.Add(op2);
                         }
                     }
+
+                    operators2.Free();
                 }
             }
 
-            foreach (MethodSymbol op in candidates)
+            foreach (MethodSymbol op in operators)
             {
                 // We might have a bad operator and be in an error recovery situation. Ignore it.
                 if (op.ReturnsVoid || op.ParameterCount != 1 || op.ReturnType.TypeKind == TypeKind.Error)
@@ -355,7 +363,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 }
             }
 
-            candidates.Free();
+            operators.Free();
         }
 
         private TypeSymbol MostSpecificSourceTypeForExplicitUserDefinedConversion(
@@ -412,7 +420,6 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 useSiteInfo = inLambdaUseSiteInfo;
             }
-
 
             return MostEncompassingType(u, conv => conv.FromType, ref useSiteInfo);
         }

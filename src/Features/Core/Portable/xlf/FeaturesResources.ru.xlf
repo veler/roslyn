@@ -40,20 +40,10 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Вычитание должно быть последним элементом в классе символов</target>
         <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: [a-[b]-c]</note>
       </trans-unit>
-      <trans-unit id="Accessing_captured_variable_0_that_hasn_t_been_accessed_before_in_1_requires_restarting_the_application">
-        <source>Accessing captured variable '{0}' that hasn't been accessed before in {1} requires restarting the application.</source>
-        <target state="translated">Для доступа к зафиксированной переменной "{0}", к которой ранее не было доступа в {1}, требуется перезапустить приложение.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Add_DebuggerDisplay_attribute">
         <source>Add 'DebuggerDisplay' attribute</source>
         <target state="translated">Добавить атрибут "DebuggerDisplay"</target>
         <note>{Locked="DebuggerDisplay"} "DebuggerDisplay" is a BCL class and should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="Add_member_name">
-        <source>Add member name</source>
-        <target state="translated">Добавить имя элемента</target>
-        <note />
       </trans-unit>
       <trans-unit id="Add_null_checks_for_all_parameters">
         <source>Add null checks for all parameters</source>
@@ -63,11 +53,6 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       <trans-unit id="Add_optional_parameter_to_constructor">
         <source>Add optional parameter to constructor</source>
         <target state="translated">Добавить необязательный параметр в конструктор</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Add_parameter_to_0_and_overrides_implementations">
-        <source>Add parameter to '{0}' (and overrides/implementations)</source>
-        <target state="translated">Добавить параметр в "{0}" (а также переопределения или реализации)</target>
         <note />
       </trans-unit>
       <trans-unit id="Add_parameter_to_constructor">
@@ -100,21 +85,6 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Для добавления {0} вокруг активного оператора требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Adding_0_into_a_1_requires_restarting_the_application">
-        <source>Adding {0} into a {1} requires restarting the application.</source>
-        <target state="translated">Для добавления {0} в {1} требуется перезапустить приложение.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Adding_0_into_a_class_with_explicit_or_sequential_layout_requires_restarting_the_application">
-        <source>Adding {0} into a class with explicit or sequential layout requires restarting the application.</source>
-        <target state="translated">Для добавления {0} в класс с явным или последовательным макетом требуется перезапустить приложение.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Adding_0_into_a_generic_type_requires_restarting_the_application">
-        <source>Adding {0} into a generic type requires restarting the application.</source>
-        <target state="translated">Для добавления {0} в универсальный тип требуется перезапустить приложение.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Adding_0_into_an_interface_method_requires_restarting_the_application">
         <source>Adding {0} into an interface method requires restarting the application.</source>
         <target state="translated">Для добавления {0} в метод интерфейса требуется перезапустить приложение.</target>
@@ -130,11 +100,6 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Для добавления {0} требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Adding_0_that_accesses_captured_variables_1_and_2_declared_in_different_scopes_requires_restarting_the_application">
-        <source>Adding {0} that accesses captured variables '{1}' and '{2}' declared in different scopes requires restarting the application.</source>
-        <target state="translated">Для добавления {0} с доступом к зафиксированным переменным "{1}" и "{2}", которые объявлены в разных областях, требуется перезапустить приложение.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Adding_0_with_the_Handles_clause_requires_restarting_the_application">
         <source>Adding {0} with the Handles clause requires restarting the application.</source>
         <target state="translated">Для добавления {0} с предложением Handles требуется перезапустить приложение.</target>
@@ -148,11 +113,6 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       <trans-unit id="Adding_a_constructor_to_a_type_with_a_field_or_property_initializer_that_contains_an_anonymous_function_requires_restarting_the_application">
         <source>Adding a constructor to a type with a field or property initializer that contains an anonymous function requires restarting the application.</source>
         <target state="translated">Для добавления конструктора к типу с инициализатором поля или свойства, содержащим анонимную функцию, требуется перезапустить приложение.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Adding_a_generic_0_requires_restarting_the_application">
-        <source>Adding a generic {0} requires restarting the application.</source>
-        <target state="translated">Для добавления универсального {0} требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
       <trans-unit id="Adding_a_method_with_an_explicit_interface_specifier_requires_restarting_the_application">
@@ -183,6 +143,21 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       <trans-unit id="Adding_an_imported_method_requires_restarting_the_application">
         <source>Adding an imported method requires restarting the application.</source>
         <target state="translated">Для добавления импортированного метода требуется перезапустить приложение.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Adding_or_moving_0_of_1_requires_restarting_the_application">
+        <source>Adding or moving {0} of {1} requires restarting the application.</source>
+        <target state="translated">Добавление или {0} {1} требует перезапуска приложения.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Adding_or_moving_0_of_1_with_explicit_or_sequential_layout_requires_restarting_the_application">
+        <source>Adding or moving {0} of {1} with explicit or sequential layout requires restarting the application.</source>
+        <target state="translated">Добавление или перемещение {0} из {1} с явной или последовательной компоновкой требует перезапуска приложения.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Adding_or_moving_0_of_a_COM_interface_requires_restarting_the_application">
+        <source>Adding or moving {0} of a COM interface requires restarting the application.</source>
+        <target state="translated">Чтобы добавить или {0} com-интерфейса, необходимо перезапустить приложение.</target>
         <note />
       </trans-unit>
       <trans-unit id="Align_wrapped_arguments">
@@ -336,8 +311,8 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <note>{Locked="ConfigureAwait"} "ConfigureAwait" is an api name and should not be localized. {0} is a placeholder for the language specific keyword 'false'.</note>
       </trans-unit>
       <trans-unit id="Awaited_task_returns_0">
-        <source>Awaited task returns '{0}'</source>
-        <target state="translated">Ожидаемая задача возвращает "{0}".</target>
+        <source>Awaited task returns {0}</source>
+        <target state="translated">Ожидаемая задача возвращает {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Awaited_task_returns_no_value">
@@ -345,14 +320,24 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Ожидаемая задача не возвращает значение.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Base_classes_contain_inaccessible_unimplemented_members">
-        <source>Base classes contain inaccessible unimplemented members</source>
-        <target state="translated">Базовые классы содержат недоступные нереализованные члены</target>
+      <trans-unit id="Built_in_Copilot_analysis">
+        <source>Built-in Copilot analysis</source>
+        <target state="translated">Встроенный анализ Copilot</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CSharp_VisualBasic_References">
+        <source>C# and Visual Basic References</source>
+        <target state="translated">Справочники по C# и Visual Basic</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotApplyChangesUnexpectedError">
         <source>Cannot apply changes -- unexpected error: '{0}'</source>
         <target state="translated">Не удается применить изменения, так как возникла непредвиденная ошибка: "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Cannot_determine_valid_range_of_statements_to_extract">
+        <source>Cannot determine valid range of statements to extract</source>
+        <target state="translated">Невозможно определить допустимый диапазон операторов для извлечения</target>
         <note />
       </trans-unit>
       <trans-unit id="Cannot_include_class_0_in_character_range">
@@ -365,29 +350,19 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Не удается перейти к символу, на котором находится курсор.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Capture_group_numbers_must_be_less_than_or_equal_to_Int32_MaxValue">
-        <source>Capture group numbers must be less than or equal to Int32.MaxValue</source>
-        <target state="translated">Номера групп записи должны быть меньше или равны Int32.MaxValue</target>
-        <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: a{2147483648}</note>
-      </trans-unit>
       <trans-unit id="Capture_number_cannot_be_zero">
         <source>Capture number cannot be zero</source>
         <target state="translated">Номер записи не может быть равен нулю</target>
         <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: (?&lt;0&gt;a)</note>
       </trans-unit>
-      <trans-unit id="Capturing_variable_0_that_hasn_t_been_captured_before_requires_restarting_the_application">
-        <source>Capturing variable '{0}' that hasn't been captured before requires restarting the application.</source>
-        <target state="translated">Для фиксации переменной "{0}", которая ранее не была зафиксированной, требуется перезапустить приложение.</target>
+      <trans-unit id="Capturing_primary_constructor_parameter_0_that_hasn_t_been_captured_before_requires_restarting_the_application">
+        <source>Capturing primary constructor parameter '{0}' that hasn't been capture before requires restarting the application.</source>
+        <target state="translated">Для фиксации параметра первичной конструкции "{0}", который ранее не был зафиксирован, требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Ceasing_to_access_captured_variable_0_in_1_requires_restarting_the_application">
-        <source>Ceasing to access captured variable '{0}' in {1} requires restarting the application.</source>
-        <target state="translated">Для прекращения доступа к зафиксированной переменной "{0}" в {1} требуется перезапустить приложение.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Ceasing_to_capture_variable_0_requires_restarting_the_application">
-        <source>Ceasing to capture variable '{0}' requires restarting the application.</source>
-        <target state="translated">Для прекращения фиксации переменной "{0}" требуется перезапустить приложение.</target>
+      <trans-unit id="Ceasing_to_capture_primary_constructor_parameter_0_of_1_requires_restarting_the_application">
+        <source>Ceasing to capture primary constructor parameter '{0}' of '{1}' requires restarting the application.</source>
+        <target state="translated">Для прекращения фиксации параметра первичной конструкции "{0}" "{1}" требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChangeSignature_NewParameterInferValue">
@@ -397,7 +372,7 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       </trans-unit>
       <trans-unit id="ChangeSignature_NewParameterIntroduceTODOVariable">
         <source>TODO</source>
-        <target state="new">TODO</target>
+        <target state="translated">TODO</target>
         <note>"TODO" is an indication that there is work still to be done.</note>
       </trans-unit>
       <trans-unit id="ChangeSignature_NewParameterOmitValue">
@@ -430,6 +405,11 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Для изменения {0} с асинхронного на синхронный требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Changing_0_might_not_have_any_effect_until_the_application_is_restarted">
+        <source>Changing '{0}' might not have any effect until the application is restarted.</source>
+        <target state="translated">Изменение "{0}" может не иметь эффекта до перезапуска приложения.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Changing_0_to_1_requires_restarting_the_application_because_it_changes_the_shape_of_the_state_machine">
         <source>Changing '{0}' to '{1}' requires restarting the application because it changes the shape of the state machine.</source>
         <target state="translated">Для изменения "{0}" на "{1}" требуется перезапустить приложение, так как при этом изменяется форма конечного автомата.</target>
@@ -440,9 +420,19 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Для изменения поля на событие или наоборот требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Changing_attribute_0_requires_restarting_the_application">
+        <source>Changing attribute '{0}' requires restarting the application.</source>
+        <target state="translated">Для изменения атрибута "{0}" требуется перезапустить приложение.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Changing_constraints_of_0_requires_restarting_the_application">
         <source>Changing constraints of {0} requires restarting the application.</source>
         <target state="translated">Для изменения ограничений {0} требуется перезапустить приложение.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Changing_name_or_signature_of_0_that_contains_an_active_statement_requires_restarting_the_application">
+        <source>Changing attribute '{0}' requires restarting the application.</source>
+        <target state="translated">Для изменения атрибута "{0}" требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
       <trans-unit id="Changing_parameter_types_of_0_requires_restarting_the_application">
@@ -457,7 +447,7 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       </trans-unit>
       <trans-unit id="Changing_the_containing_namespace_of_0_from_1_to_2_requires_restarting_th_application">
         <source>Changing the containing namespace of '{0}' from '{1}' to '{2}' requires restarting the application</source>
-        <target state="new">Changing the containing namespace of '{0}' from '{1}' to '{2}' requires restarting the application</target>
+        <target state="translated">Чтобы изменить содержащее пространство имен "{0}" с "{1}" на "{2}", необходимо перезапустить приложение</target>
         <note />
       </trans-unit>
       <trans-unit id="Changing_the_declaration_scope_of_a_captured_variable_0_requires_restarting_the_application">
@@ -475,9 +465,14 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Для изменения типа возвращаемого значения {0} требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Changing_the_type_of_0_requires_restarting_the_application">
-        <source>Changing the type of {0} requires restarting the application.</source>
-        <target state="translated">Для изменения типа {0} требуется перезапустить приложение.</target>
+      <trans-unit id="Changing_the_signature_of_0_requires_restarting_the_application">
+        <source>Changing the signature of {0} requires restarting the application.</source>
+        <target state="translated">Изменение подписи {0} требует перезапуска приложения.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Changing_the_signature_of_0_requires_restarting_the_application_because_it_is_not_supported_by_the_runtime">
+        <source>Changing the signature of {0} requires restarting the application because is not supported by the runtime.</source>
+        <target state="translated">Для изменения подписи {0} требуется перезапустить приложение, так как это не поддерживается средой выполнения.</target>
         <note />
       </trans-unit>
       <trans-unit id="Changing_the_type_of_a_captured_variable_0_previously_of_type_1_requires_restarting_the_application">
@@ -495,10 +490,30 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Для изменения видимости {0} требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Chosen_version_0">
+        <source>Chosen version: '{0}'</source>
+        <target state="translated">Выбранная версия: "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Code_snippet_for_0">
+        <source>Code snippet for '{0}'</source>
+        <target state="translated">Фрагмент кода для "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Comments_not_allowed">
         <source>Comments not allowed</source>
         <target state="translated">Комментарии не разрешены</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Conditional_alternation_is_missing_a_closing_parenthesis_after_the_group number_0">
+        <source>Conditional alternation is missing a closing parenthesis after the group number {0}</source>
+        <target state="new">Conditional alternation is missing a closing parenthesis after the group number {0}</target>
+        <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: (?(0</note>
+      </trans-unit>
+      <trans-unit id="Conditional_alternation_refers_to_an_undefined_group_number_0">
+        <source>Conditional alternation refers to an undefined group number {0}</source>
+        <target state="new">Conditional alternation refers to an undefined group number {0}</target>
+        <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: (?(1)\1))</note>
       </trans-unit>
       <trans-unit id="Configure_0_code_style">
         <source>Configure {0} code style</source>
@@ -520,6 +535,11 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Настройка серьезности для всех анализаторов</target>
         <note />
       </trans-unit>
+      <trans-unit id="Conflict_s_detected">
+        <source>Conflict(s) detected.</source>
+        <target state="translated">Обнаружены конфликты.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Constructors_not_allowed">
         <source>Constructors not allowed</source>
         <target state="translated">Конструкторы не разрешены</target>
@@ -527,22 +547,27 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       </trans-unit>
       <trans-unit id="Containing_Member">
         <source>Containing Member</source>
-        <target state="new">Containing Member</target>
+        <target state="translated">Содержащий член</target>
         <note />
       </trans-unit>
       <trans-unit id="Containing_Type">
         <source>Containing Type</source>
-        <target state="new">Containing Type</target>
+        <target state="translated">Содержащий тип</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Convert_number">
+        <source>Convert number</source>
+        <target state="translated">Преобразовать число</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Convert_to_field_property">
+        <source>Convert to 'field' property</source>
+        <target state="new">Convert to 'field' property</target>
+        <note>{Locked="field"} "field" is C# keyword and should not be localized.</note>
       </trans-unit>
       <trans-unit id="Convert_to_linq">
         <source>Convert to LINQ</source>
         <target state="translated">Преобразовать в LINQ</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Add_to_0">
-        <source>Add to '{0}'</source>
-        <target state="translated">Добавить в "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Convert_to_class">
@@ -585,9 +610,14 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Не удалось найти PDB-файл на диске, во внедренном источнике или на сервере символов.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Could_not_find_by_name_0">
+        <source>Could not find by name: '{0}'</source>
+        <target state="translated">Не удалось найти по имени: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Could_not_find_implementation_of_symbol_0">
         <source>Could not find implementation of symbol '{0}'</source>
-        <target state="new">Could not find implementation of symbol '{0}'</target>
+        <target state="translated">Не найдена реализация символа "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Create_and_assign_field_0">
@@ -610,9 +640,29 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Создать и назначить оставшиеся как свойства</target>
         <note />
       </trans-unit>
+      <trans-unit id="Debug_All_Tests">
+        <source>Debug All Tests</source>
+        <target state="translated">Отладить все тесты</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Debug_Test">
+        <source>Debug Test</source>
+        <target state="translated">Отладка теста</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Decompilation_log">
+        <source>Decompilation log</source>
+        <target state="translated">Журнал декомпиляции</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Decompiled">
         <source>decompiled</source>
-        <target state="new">decompiled</target>
+        <target state="translated">декомпилировано</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Deconstruct_locals_for_0">
+        <source>Deconstruct locals for '{0}'</source>
+        <target state="translated">Деконструировать локальные объекты для "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Deleting_0_around_an_active_statement_requires_restarting_the_application">
@@ -625,19 +675,19 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Для удаления {0} требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Deleting_captured_variable_0_requires_restarting_the_application">
-        <source>Deleting captured variable '{0}' requires restarting the application.</source>
-        <target state="translated">Для удаления зафиксированной переменной "{0}" требуется перезапустить приложение.</target>
+      <trans-unit id="Deleting_0_requires_restarting_the_application_because_is_not_supported_by_the_runtime">
+        <source>Deleting {0} requires restarting the application because is not supported by the runtime.</source>
+        <target state="translated">Для удаления {0} требуется перезапустить приложение, поскольку удаление не поддерживается средой выполнения.</target>
         <note />
       </trans-unit>
       <trans-unit id="Directives_from_0">
         <source>Directives from '{0}'</source>
-        <target state="new">Directives from '{0}'</target>
+        <target state="translated">Директивы из "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="Do_not_change_this_code_Put_cleanup_code_in_0_method">
-        <source>Do not change this code. Put cleanup code in '{0}' method</source>
-        <target state="translated">Не изменяйте этот код. Разместите код очистки в методе "{0}".</target>
+      <trans-unit id="Dismiss">
+        <source>Dismiss</source>
+        <target state="translated">Отклонить</target>
         <note />
       </trans-unit>
       <trans-unit id="DocumentIsOutOfSyncWithDebuggee">
@@ -663,6 +713,11 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       <trans-unit id="Enable_all_JSON_editor_features">
         <source>Enable all JSON editor features</source>
         <target state="translated">Включить все функции редактора JSON</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Enum_members">
+        <source>Enum members</source>
+        <target state="translated">Элементы перечисления</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingFile">
@@ -700,15 +755,15 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Примеры:</target>
         <note>Plural form when we have multiple examples to show.</note>
       </trans-unit>
-      <trans-unit id="Explicitly_implemented_methods_of_records_must_have_parameter_names_that_match_the_compiler_generated_equivalent_0">
-        <source>Explicitly implemented methods of records must have parameter names that match the compiler generated equivalent '{0}'</source>
-        <target state="translated">Явно реализованные методы записей должны иметь имена параметров, соответствующие компилятору, созданному эквивалентом '{0}'</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Extract_base_class">
         <source>Extract base class...</source>
         <target state="translated">Извлечь базовый класс...</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Extract_base_record">
+        <source>Extract base record...</source>
+        <target state="translated">Извлечь базовый объект record...</target>
+        <note>{Locked="record"} "record" is a language construct for C# and should not be localized.</note>
       </trans-unit>
       <trans-unit id="Extract_interface">
         <source>Extract interface...</source>
@@ -730,14 +785,34 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Не удалось проанализировать поток данных для: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="Find_All_References_not_invoked_on_applicable_symbol">
+        <source>'Find All References' not invoked on applicable symbol</source>
+        <target state="translated">Метод "Найти все ссылки" не вызван для применимого символа</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Fix_All_0">
+        <source>Fix All: {0}</source>
+        <target state="translated">Исправить все: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Fix_typo_0">
         <source>Fix typo '{0}'</source>
         <target state="translated">Исправьте опечатку "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="Fixing_0">
+        <source>Fixing '{0}'</source>
+        <target state="translated">Исправление "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Formatting_document">
         <source>Formatting document</source>
         <target state="translated">Форматирование документа</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Found_0_assemblies_for_1">
+        <source>Found '{0}' assemblies for '{1}':</source>
+        <target state="translated">Обнаружены сборки ("{0}") для "{1}":</target>
         <note />
       </trans-unit>
       <trans-unit id="Found_PDB_file_at_0">
@@ -760,14 +835,19 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Найден внедренный PDB-файл.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Generate_abstract_method_0">
-        <source>Generate abstract method '{0}'</source>
-        <target state="translated">Создать абстрактный метод "{0}"</target>
+      <trans-unit id="Found_exact_match_0">
+        <source>Found exact match: '{0}'</source>
+        <target state="translated">Обнаружено точное совпадение: "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="Generate_abstract_property_0">
-        <source>Generate abstract property '{0}'</source>
-        <target state="translated">Создать абстрактное свойство "{0}"</target>
+      <trans-unit id="Found_higher_version_match_0">
+        <source>Found higher version match: '{0}'</source>
+        <target state="translated">Обнаружено более высокое совпадение версий: "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Found_single_assembly_0">
+        <source>Found single assembly: '{0}'</source>
+        <target state="translated">Найдена одна сборка: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Generate_comparison_operators">
@@ -775,64 +855,14 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Создать операторы сравнения</target>
         <note />
       </trans-unit>
-      <trans-unit id="Generate_constant_0">
-        <source>Generate constant '{0}'</source>
-        <target state="translated">Создать константу "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_constructor_in_0_with_fields">
-        <source>Generate constructor in '{0}' (with fields)</source>
-        <target state="translated">Создать конструктор в "{0}" (с полями)</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_constructor_in_0_with_properties">
-        <source>Generate constructor in '{0}' (with properties)</source>
-        <target state="translated">Создать конструктор в "{0}" (со свойствами)</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_enum_member_0">
-        <source>Generate enum member '{0}'</source>
-        <target state="translated">Создать элемент перечисления "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_field_0">
-        <source>Generate field '{0}'</source>
-        <target state="translated">Создать поле "{0}"</target>
+      <trans-unit id="Generate_constructor_from_members">
+        <source>Generate constructor from members...</source>
+        <target state="translated">Создать конструктор из элементов...</target>
         <note />
       </trans-unit>
       <trans-unit id="Generate_for_0">
         <source>Generate for '{0}'</source>
         <target state="translated">Создать для "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_method_0">
-        <source>Generate method '{0}'</source>
-        <target state="translated">Создать метод "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_parameter_0">
-        <source>Generate parameter '{0}'</source>
-        <target state="translated">Создать параметр "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_parameter_0_and_overrides_implementations">
-        <source>Generate parameter '{0}' (and overrides/implementations)</source>
-        <target state="translated">Создать параметр "{0}" (а также переопределения или реализации)</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_property_0">
-        <source>Generate property '{0}'</source>
-        <target state="translated">Создать свойство "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_read_only_field_0">
-        <source>Generate read-only field '{0}'</source>
-        <target state="translated">Создать поле только для чтения "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_read_only_property_0">
-        <source>Generate read-only property '{0}'</source>
-        <target state="translated">Создать свойство только для чтения "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Illegal_backslash_at_end_of_pattern">
@@ -865,11 +895,6 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Реализовать "{0}" неявно</target>
         <note />
       </trans-unit>
-      <trans-unit id="Implement_abstract_class">
-        <source>Implement abstract class</source>
-        <target state="translated">Реализовать абстрактный класс</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Implement_all_interfaces_explicitly">
         <source>Implement all interfaces explicitly</source>
         <target state="translated">Реализовать все интерфейсы явно</target>
@@ -880,11 +905,6 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Реализовать все интерфейсы неявно</target>
         <note />
       </trans-unit>
-      <trans-unit id="Implement_all_members_explicitly">
-        <source>Implement all members explicitly</source>
-        <target state="translated">Реализовать все элементы явно</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Implement_explicitly">
         <source>Implement explicitly</source>
         <target state="translated">Реализовать явно</target>
@@ -893,26 +913,6 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       <trans-unit id="Implement_implicitly">
         <source>Implement implicitly</source>
         <target state="translated">Реализовать неявно</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Implement_remaining_members_explicitly">
-        <source>Implement remaining members explicitly</source>
-        <target state="translated">Реализовать оставшиеся элементы явно</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Implement_through_0">
-        <source>Implement through '{0}'</source>
-        <target state="translated">Реализовать через "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Implementing_a_record_positional_parameter_0_as_read_only_requires_restarting_the_application">
-        <source>Implementing a record positional parameter '{0}' as read only requires restarting the application,</source>
-        <target state="translated">Для реализации позиционного параметра записи "{0}" в режиме только для чтения требуется перезапустить приложение.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Implementing_a_record_positional_parameter_0_with_a_set_accessor_requires_restarting_the_application">
-        <source>Implementing a record positional parameter '{0}' with a set accessor requires restarting the application.</source>
-        <target state="translated">Для реализации позиционного параметра записи "{0}" с заданным методом доступа требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
       <trans-unit id="Incomplete_character_escape">
@@ -955,9 +955,14 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Сделать "{0}" встроенным и сохранить его</target>
         <note />
       </trans-unit>
-      <trans-unit id="Insufficient_hexadecimal_digits">
-        <source>Insufficient hexadecimal digits</source>
-        <target state="translated">Недостаточно шестнадцатеричных цифр</target>
+      <trans-unit id="Inline_temporary_variable">
+        <source>Inline temporary variable</source>
+        <target state="translated">Встроить временную переменную</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Insufficient_or_invalid_hexadecimal_digits">
+        <source>Insufficient or invalid hexadecimal digits</source>
+        <target state="new">Insufficient or invalid hexadecimal digits</target>
         <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: \x</note>
       </trans-unit>
       <trans-unit id="Introduce_constant">
@@ -1040,6 +1045,11 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Инвертировать условный оператор</target>
         <note />
       </trans-unit>
+      <trans-unit id="Load_from_0">
+        <source>Load from: '{0}'</source>
+        <target state="translated">Загрузить из: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Making_a_method_an_iterator_requires_restarting_the_application_because_it_is_not_supported_by_the_runtime">
         <source>Making a method an iterator requires restarting the application because is not supported by the runtime.</source>
         <target state="translated">Чтобы сделать метод итератором, требуется перезапустить приложение, так как это не поддерживается средой выполнения.</target>
@@ -1049,11 +1059,6 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <source>Making a method asynchronous requires restarting the application because is not supported by the runtime.</source>
         <target state="translated">Чтобы сделать метод асинхронным, требуется перезапустить приложение, так как это не поддерживается средой выполнения.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="Malformed">
-        <source>malformed</source>
-        <target state="translated">Ошибка в регулярном выражении</target>
-        <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: (?(0</note>
       </trans-unit>
       <trans-unit id="Malformed_character_escape">
         <source>Malformed \p{X} character escape</source>
@@ -1088,6 +1093,11 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       <trans-unit id="MethodMustReturnStreamThatSupportsReadAndSeek">
         <source>{0} must return a stream that supports read and seek operations.</source>
         <target state="translated">{0} должен возвращать поток, который поддерживает операции чтения и поиска.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Method_0_must_be_static_and_non_generic">
+        <source>Method '{0}' must be static and non-generic</source>
+        <target state="translated">Метод "{0}" должен быть статическим и неуниверсалным</target>
         <note />
       </trans-unit>
       <trans-unit id="Miscellaneous_Files">
@@ -1170,24 +1180,19 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Для изменения исходного кода с включенными экспериментальными функциями языка требуется перезапустить приложение..</target>
         <note />
       </trans-unit>
-      <trans-unit id="Modifying_the_initializer_of_0_in_a_generic_type_requires_restarting_the_application">
-        <source>Modifying the initializer of {0} in a generic type requires restarting the application.</source>
-        <target state="translated">Для изменения инициализатора {0} универсального типа требуется перезапустить приложение.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Modifying_whitespace_or_comments_in_0_inside_the_context_of_a_generic_type_requires_restarting_the_application">
-        <source>Modifying whitespace or comments in {0} inside the context of a generic type requires restarting the application.</source>
-        <target state="translated">Для изменения пустого пространства или комментариев в {0} в контексте универсального типа требуется перезапустить приложение.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Modifying_whitespace_or_comments_in_a_generic_0_requires_restarting_the_application">
-        <source>Modifying whitespace or comments in a generic {0} requires restarting the application.</source>
-        <target state="translated">Для изменения пустого пространства или комментариев в универсальном {0} требуется перезапустить приложение.</target>
+      <trans-unit id="Module_not_found">
+        <source>Module not found!</source>
+        <target state="translated">Модуль не найден.</target>
         <note />
       </trans-unit>
       <trans-unit id="Move_contents_to_namespace">
         <source>Move contents to namespace...</source>
         <target state="translated">Переместить содержимое в пространство имен...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Move_declaration_near_reference_may_change_semantics">
+        <source>Move declaration near reference (may change semantics)</source>
+        <target state="translated">Переместить объявление рядом со ссылкой (может изменить семантику)</target>
         <note />
       </trans-unit>
       <trans-unit id="Move_file_to_0">
@@ -1215,6 +1220,11 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Для перемещения {0} требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NET_Code_Actions">
+        <source>.NET Code Actions</source>
+        <target state="translated">Действия кода .NET</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Name_expected">
         <source>Name expected</source>
         <target state="translated">Ожидалось имя</target>
@@ -1231,8 +1241,8 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <note />
       </trans-unit>
       <trans-unit id="Nested_quantifier_0">
-        <source>Nested quantifier {0}</source>
-        <target state="translated">Вложенный квантификатор {0}</target>
+        <source>Nested quantifier '{0}'</source>
+        <target state="needs-review-translation">Вложенный квантификатор {0}</target>
         <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: a**. In this case {0} will be '*', the extra unnecessary quantifier.</note>
       </trans-unit>
       <trans-unit id="No_common_root_node_for_extraction">
@@ -1255,6 +1265,16 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Нет допустимого выделения для извлечения.</target>
         <note />
       </trans-unit>
+      <trans-unit id="No_valid_statement_range_to_extract">
+        <source>No valid statement range to extract</source>
+        <target state="translated">Отсутствует допустимый диапазон операторов для извлечения</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Not_all_code_paths_return">
+        <source>Not all code paths return</source>
+        <target state="translated">Не все пути к коду возвращают значения</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Not_enough_close_parens">
         <source>Not enough )'s</source>
         <target state="translated">Отсутствуют закрывающие круглые скобки</target>
@@ -1268,6 +1288,11 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       <trans-unit id="Operators">
         <source>Operators</source>
         <target state="translated">Операторы</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Please_resolve_errors_in_your_code_before_renaming_this_element">
+        <source>Please resolve errors in your code before renaming this element.</source>
+        <target state="translated">Устраните ошибки в коде, прежде чем переименовать этот элемент.</target>
         <note />
       </trans-unit>
       <trans-unit id="Probable_JSON_string_detected">
@@ -1295,14 +1320,9 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Не удается обновить ссылку на свойство</target>
         <note />
       </trans-unit>
-      <trans-unit id="Pull_0_up">
-        <source>Pull '{0}' up</source>
-        <target state="translated">Извлечь "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Pull_0_up_to_1">
-        <source>Pull '{0}' up to '{1}'</source>
-        <target state="translated">Извлечь '{0}' в '{1}'</target>
+      <trans-unit id="Pull_0_up_to">
+        <source>Pull '{0}' up to ...</source>
+        <target state="translated">Извлечь "{0}" до ...</target>
         <note />
       </trans-unit>
       <trans-unit id="Pull_members_up_to_base_type">
@@ -1310,24 +1330,39 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">Извлечь элементы до базового типа...</target>
         <note />
       </trans-unit>
-      <trans-unit id="Quantifier_x_y_following_nothing">
-        <source>Quantifier {x,y} following nothing</source>
-        <target state="translated">Отсутствуют элементы перед квантификатором {x,y}</target>
+      <trans-unit id="Pull_selected_members_up">
+        <source>Pull selected members up</source>
+        <target state="translated">Вытянуть выбранные элементы вверх</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Pull_selected_members_up_to_0">
+        <source>Pull selected members up to {0}</source>
+        <target state="translated">Вытянуть выбранные элементы до {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Quantifier_0_following_nothing">
+        <source>Quantifier '{0}' following nothing</source>
+        <target state="new">Quantifier '{0}' following nothing</target>
         <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: *</note>
       </trans-unit>
-      <trans-unit id="Reference_to_undefined_group">
-        <source>reference to undefined group</source>
-        <target state="translated">Ссылка на неопределенную группу</target>
-        <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: (?(1))</note>
+      <trans-unit id="Quantifier_and_capture_group_numbers_must_be_less_than_or_equal_to_Int32_MaxValue">
+        <source>Quantifier and capture group numbers must be less than or equal to Int32.MaxValue</source>
+        <target state="new">Quantifier and capture group numbers must be less than or equal to Int32.MaxValue</target>
+        <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: a{2147483648}</note>
+      </trans-unit>
+      <trans-unit id="Query">
+        <source>Query</source>
+        <target state="translated">Запрос</target>
+        <note />
       </trans-unit>
       <trans-unit id="Reference_to_undefined_group_name_0">
-        <source>Reference to undefined group name {0}</source>
-        <target state="translated">Ссылка на неопределенное имя группы {0}</target>
+        <source>Reference to undefined group name '{0}'</source>
+        <target state="needs-review-translation">Ссылка на неопределенное имя группы {0}</target>
         <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: \k&lt;a&gt;. Here, {0} will be the name of the undefined group ('a')</note>
       </trans-unit>
       <trans-unit id="Reference_to_undefined_group_number_0">
         <source>Reference to undefined group number {0}</source>
-        <target state="translated">Ссылка на неопределенный номер группы {0}</target>
+        <target state="new">Reference to undefined group number {0}</target>
         <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: (?&lt;-1&gt;). Here, {0} will be the number of the undefined group ('1')</note>
       </trans-unit>
       <trans-unit id="Regex_all_control_characters_long">
@@ -1983,7 +2018,7 @@ Two or more character ranges can be concatenated. For example, to specify the ra
       </trans-unit>
       <trans-unit id="Regex_negative_unicode_category_long">
         <source>The regular expression construct \P{ name } matches any character that does not belong to a Unicode general category or named block, where name is the category abbreviation or named block name.</source>
-        <target state="translated">Конструкция регулярного выражения \P{ имя } соответствует любому символу, который не относится к общей категории Юникода или именованному блоку, где "имя" — это сокращение названия категории или имя именованного блока.</target>
+        <target state="translated">Конструкция регулярного выражения \P{ name } соответствует любому символу, который не относится к общей категории Юникода или именованному блоку, где "имя" — это сокращение названия категории или имя именованного блока.</target>
         <note />
       </trans-unit>
       <trans-unit id="Regex_negative_unicode_category_short">
@@ -2275,7 +2310,7 @@ There is an ambiguity between octal escape codes (such as \16) and \number backr
       </trans-unit>
       <trans-unit id="Regex_unicode_category_long">
         <source>The regular expression construct \p{ name } matches any character that belongs to a Unicode general category or named block, where name is the category abbreviation or named block name.</source>
-        <target state="translated">Конструкция регулярного выражения \p{ имя } соответствует любому символу, который относится к общей категории Юникода или именованному блоку, где "имя" — это сокращение названия категории или имя именованного блока.</target>
+        <target state="translated">Конструкция регулярного выражения \p{ name } соответствует любому символу, который относится к общей категории Юникода или именованному блоку, где "имя" — это сокращение названия категории или имя именованного блока.</target>
         <note />
       </trans-unit>
       <trans-unit id="Regex_unicode_category_short">
@@ -2445,29 +2480,19 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">положительное утверждение просмотра назад нулевой ширины</target>
         <note />
       </trans-unit>
-      <trans-unit id="Related_method_signatures_found_in_metadata_will_not_be_updated">
-        <source>Related method signatures found in metadata will not be updated.</source>
-        <target state="translated">Связанные сигнатуры методов, найденные в метаданных, не будут обновлены.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Removal_of_document_not_supported">
         <source>Removal of document not supported</source>
         <target state="translated">Удаление документа не поддерживается</target>
         <note />
       </trans-unit>
-      <trans-unit id="Remove_async_modifier">
-        <source>Remove 'async' modifier</source>
-        <target state="translated">Удалить модификатор "async"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Remove_unnecessary_Imports_or_usings">
-        <source>Remove unnecessary Imports or usings</source>
-        <target state="translated">Удалить ненужные операторы Imports или директивы using</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Remove_unnecessary_casts">
         <source>Remove unnecessary casts</source>
         <target state="translated">Удалить ненужные приведения</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Remove_unnecessary_imports_or_usings">
+        <source>Remove unnecessary imports or usings</source>
+        <target state="translated">Удалить ненужные операции импорта или использования</target>
         <note />
       </trans-unit>
       <trans-unit id="Remove_unused_parameters">
@@ -2483,11 +2508,6 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
       <trans-unit id="Remove_unused_variables">
         <source>Remove unused variables</source>
         <target state="translated">Удалить неиспользуемые переменные</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Removing_0_that_accessed_captured_variables_1_and_2_declared_in_different_scopes_requires_restarting_the_application">
-        <source>Removing {0} that accessed captured variables '{1}' and '{2}' declared in different scopes requires restarting the application.</source>
-        <target state="translated">Для удаления {0} с доступом к зафиксированным переменным "{1}" и "{2}", которые объявлены в разных областях, требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
       <trans-unit id="Removing_0_that_contains_an_active_statement_requires_restarting_the_application">
@@ -2510,6 +2530,11 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Для переименования зафиксированной переменной из "{0}" в "{1}" требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Renaming_anonymous_type_members_is_not_yet_supported">
+        <source>Renaming anonymous type members is not yet supported.</source>
+        <target state="translated">Переименование членов анонимного типа еще не поддерживается.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Replace_0_with_1">
         <source>Replace '{0}' with '{1}' </source>
         <target state="translated">Замените '{0}' на '{1}'</target>
@@ -2517,17 +2542,37 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
       </trans-unit>
       <trans-unit id="Replace_conditional_expression_with_statements">
         <source>Replace conditional expression with statements</source>
-        <target state="new">Replace conditional expression with statements</target>
+        <target state="translated">Заменить условное выражение операторами</target>
         <note />
       </trans-unit>
-      <trans-unit id="Resolve_conflict_markers">
-        <source>Resolve conflict markers</source>
-        <target state="translated">Разрешение меток конфликтов</target>
+      <trans-unit id="Required">
+        <source>required</source>
+        <target state="translated">требуется</target>
+        <note>Used in the object initializer completion.</note>
+      </trans-unit>
+      <trans-unit id="Resolve_0">
+        <source>Resolve: '{0}'</source>
+        <target state="translated">Разрешить: "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Resolve_module_0_of_1">
+        <source>Resolve module: '{0}' of '{1}'</source>
+        <target state="translated">Разрешить модуль: "{0}" из "{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="RudeEdit">
         <source>Rude edit</source>
         <target state="translated">Грубая редакция</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Run_All_Tests">
+        <source>Run All Tests</source>
+        <target state="translated">Запустить все тесты</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Run_Test">
+        <source>Run Test</source>
+        <target state="translated">Запуск теста</target>
         <note />
       </trans-unit>
       <trans-unit id="Selection_does_not_contain_a_valid_token">
@@ -2540,9 +2585,39 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Выделенный фрагмент не входит в тип.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SemanticSearch">
+        <source>Semantic Search</source>
+        <target state="translated">Семантический поиск</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Semantic_search_only_supported_on_net_core">
+        <source>Semantic search is only supported when code analysis runs in a separate process on the latest .NET (see Tools &gt; Options &gt; Text Editor &gt; C# &gt; Advanced).</source>
+        <target state="translated">Семантический поиск поддерживается только в том случае, если анализ кода выполняется в отдельном процессе последней версии .NET (см. "Сервис" &gt; "Параметры" &gt; "Текстовый редактор" &gt; "C#" &gt; "Дополнительно").</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Semantic_search_query_failed_to_compile">
+        <source>Semantic search query failed to compile</source>
+        <target state="translated">Не удалось скомпилировать запрос семантического поиска</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Semantic_search_query_terminated_with_exception">
+        <source>Semantic search query terminated with exception</source>
+        <target state="translated">Запрос семантического поиска завершен с исключением</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Silent">
         <source>Silent</source>
         <target state="translated">Тихий</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Simplify_member_access_0">
+        <source>Simplify member access '{0}'</source>
+        <target state="translated">Упрощение доступа для членов "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Simplify_name_0">
+        <source>Simplify name '{0}'</source>
+        <target state="translated">Упрощение имени "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Sort_Imports_or_usings">
@@ -2575,11 +2650,6 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Разделить на вложенные операторы "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="StreamMustSupportReadAndSeek">
-        <source>Stream must support read and seek operations.</source>
-        <target state="translated">Поток должен поддерживать операции чтения и поиска.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Strings_must_start_with_double_quote_not_single_quote">
         <source>Strings must start with " not '</source>
         <target state="translated">Строки должны начинаться с " не '</target>
@@ -2600,19 +2670,19 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Найден символ в пути сборки "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="Symbol_search">
+        <source>Symbol search</source>
+        <target state="translated">Поиск символов</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Symbols">
+        <source>Symbols</source>
+        <target state="translated">Символы</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Syntax_error">
         <source>Syntax error</source>
         <target state="translated">Синтаксическая ошибка</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TODO_colon_free_unmanaged_resources_unmanaged_objects_and_override_finalizer">
-        <source>TODO: free unmanaged resources (unmanaged objects) and override finalizer</source>
-        <target state="translated">TODO: освободить неуправляемые ресурсы (неуправляемые объекты) и переопределить метод завершения</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TODO_colon_override_finalizer_only_if_0_has_code_to_free_unmanaged_resources">
-        <source>TODO: override finalizer only if '{0}' has code to free unmanaged resources</source>
-        <target state="translated">TODO: переопределить метод завершения, только если "{0}" содержит код для освобождения неуправляемых ресурсов</target>
         <note />
       </trans-unit>
       <trans-unit id="Target_type_matches">
@@ -2623,6 +2693,21 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
       <trans-unit id="The_assembly_0_containing_type_1_references_NET_Framework">
         <source>The assembly '{0}' containing type '{1}' references .NET Framework, which is not supported.</source>
         <target state="translated">Сборка "{0}", содержащая тип "{1}", ссылается на платформу .NET Framework, которая не поддерживается.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="The_assembly_0_references_compiler_version_1_newer_than_2">
+        <source>The analyzer assembly '{0}' references version '{1}' of the compiler, which is newer than the currently running version '{2}'.</source>
+        <target state="translated">Сборка анализатора "{0}" ссылается на версию "{1}" компилятора, являющуюся более новой, чем версия "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="The_query_does_not_specify_0_top_level_function">
+        <source>The query does not specify '{0}' top-level function</source>
+        <target state="new">The query does not specify '{0}' top-level function</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="The_query_specifies_multiple_top_level_functions_1">
+        <source>The query specifies multiple top-level functions '{1}'</source>
+        <target state="new">The query specifies multiple top-level functions '{1}'</target>
         <note />
       </trans-unit>
       <trans-unit id="The_selection_contains_a_local_function_call_without_its_declaration">
@@ -2638,6 +2723,11 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
       <trans-unit id="The_symbol_has_no_implementations">
         <source>The symbol has no implementations.</source>
         <target state="translated">Этот символ не имеет реализации.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="This_0_has_1_references">
+        <source>This {0} has {1} reference(s).</source>
+        <target state="translated">Cсылок у {0}: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Timeout_SourceLink">
@@ -2660,9 +2750,19 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Слишком много закрывающих круглых скобок</target>
         <note>This is an error message shown to the user when they write an invalid Regular Expression. Example: )</note>
       </trans-unit>
+      <trans-unit id="Top_level_function_0_must_have_a_single_parameter">
+        <source>Top-level function '{0}' must have a single parameter</source>
+        <target state="new">Top-level function '{0}' must have a single parameter</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Trailing_comma_not_allowed">
         <source>Trailing comma not allowed</source>
         <target state="translated">Завершающая запятая не разрешена</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Type_0_is_not_among_supported_types_1">
+        <source>Type '{0}' is not among supported types: {1}</source>
+        <target state="new">Type '{0}' is not among supported types: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="Types_colon">
@@ -2673,6 +2773,16 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
       <trans-unit id="UnableToReadSourceFileOrPdb">
         <source>Unable to read source file '{0}' or the PDB built for the containing project. Any changes made to this file while debugging won't be applied until its content matches the built source.</source>
         <target state="translated">Не удалось считать исходный файл "{0}" или PDB, созданный для содержащего проекта. Все изменения, внесенные в этот файл во время отладки, не будут применены, пока содержимое файла не будет соответствовать созданному источнику.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Unable_to_create_0">
+        <source>Unable to create '{0}'</source>
+        <target state="translated">Не удается создать "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Unable_to_load_type_0_1">
+        <source>Unable to load type '{0}': '{1}'</source>
+        <target state="translated">Не удалось загрузить тип "{0}": "{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Unknown_property">
@@ -2755,6 +2865,11 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Развернуть цепочку вызовов</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unwrap_collection">
+        <source>Unwrap collection</source>
+        <target state="translated">Распаковка коллекции</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Unwrap_expression">
         <source>Unwrap expression</source>
         <target state="translated">Развернуть выражение</target>
@@ -2773,6 +2888,11 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
       <trans-unit id="Updating_0_requires_restarting_the_application">
         <source>Updating '{0}' requires restarting the application.</source>
         <target state="translated">Для обновления "{0}" требуется перезапустить приложение.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Updating_0_within_generic_type_or_method_requires_restarting_the_application_because_is_not_supported_by_the_runtime">
+        <source>Updating {0} within generic type or method requires restarting the application because is not supported by the runtime.</source>
+        <target state="translated">Обновление {0} в универсальном типе или методе требует перезапуска приложения, поскольку это не поддерживается средой выполнения.</target>
         <note />
       </trans-unit>
       <trans-unit id="Updating_a_0_around_an_active_statement_requires_restarting_the_application">
@@ -2794,6 +2914,11 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <source>Updating async or iterator modifier around an active statement requires restarting the application.</source>
         <target state="translated">Для обновления модификатора async или iterator вокруг активного оператора требуется перезапустить приложение.</target>
         <note>{Locked="async"}{Locked="iterator"} "async" and "iterator" are C#/VB keywords and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="Updating_async_or_iterator_requires_restarting_the_application_because_is_not_supported_by_the_runtime">
+        <source>Updating async or iterator requires restarting the application because is not supported by the runtime.</source>
+        <target state="translated">Обновление асинхронного режима или итератора требует перезапуска приложения, так как это не поддерживается средой выполнения.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Updating_reloadable_type_marked_by_0_attribute_or_its_member_requires_restarting_the_application_because_it_is_not_supported_by_the_runtime">
         <source>Updating a reloadable type (marked by {0}) or its member requires restarting the application because is not supported by the runtime.</source>
@@ -2855,6 +2980,11 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Для обновления размера {0} требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Updating_the_type_of_0_around_an_active_statement_requires_restarting_the_application">
+        <source>Updating the type of {0} (from '{1}' to '{2}') around an active statement requires restarting the application.</source>
+        <target state="translated">Для обновления типа {0} (с "{1}" на 2{2}") вокруг активного оператора требуется перезапустить приложение.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Updating_the_type_of_0_requires_restarting_the_application">
         <source>Updating the type of {0} requires restarting the application.</source>
         <target state="translated">Для обновления типа {0} требуется перезапустить приложение.</target>
@@ -2870,16 +3000,6 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Для обновления расхождения {0} требуется перезапустить приложение.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Use_block_body_for_lambda_expressions">
-        <source>Use block body for lambda expressions</source>
-        <target state="translated">Использовать тело блока для лямбда-выражений</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Use_expression_body_for_lambda_expressions">
-        <source>Use expression body for lambda expressions</source>
-        <target state="translated">Использовать тело выражения для лямбда-выражений</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Value_colon">
         <source>Value:</source>
         <target state="translated">Значение:</target>
@@ -2888,6 +3008,11 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
       <trans-unit id="Value_required">
         <source>Value required</source>
         <target state="translated">Требуется значение</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WARN_Version_mismatch_Expected_0_Got_1">
+        <source>WARN: Version mismatch. Expected: '{0}', Got: '{1}'</source>
+        <target state="translated">Внимание! Несовпадение версий. Ожидалось: "{0}", получено: "{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Warning_colon_changing_namespace_may_produce_invalid_code_and_change_code_meaning">
@@ -2920,6 +3045,11 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Свернуть цепочку вызовов</target>
         <note />
       </trans-unit>
+      <trans-unit id="Wrap_collection">
+        <source>Wrap collection</source>
+        <target state="translated">Упаковка коллекции</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Wrap_every_argument">
         <source>Wrap every argument</source>
         <target state="translated">Свернуть каждый аргумент</target>
@@ -2950,6 +3080,11 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Свернуть длинную цепочку вызовов</target>
         <note />
       </trans-unit>
+      <trans-unit id="Wrap_long_collection">
+        <source>Wrap long collection</source>
+        <target state="translated">Упаковка длинной коллекции</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Wrap_long_initializer">
         <source>Wrap long initializer</source>
         <target state="translated">Переносить длинный инициализатор</target>
@@ -2968,6 +3103,31 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
       <trans-unit id="You_can_use_the_navigation_bar_to_switch_contexts">
         <source>You can use the navigation bar to switch contexts.</source>
         <target state="translated">Для переключения контекстов можно использовать панель навигации.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="You_cannot_rename_elements_from_previous_submissions">
+        <source>You cannot rename elements from previous submissions.</source>
+        <target state="translated">Нельзя переименовать элементы из предыдущих отправок.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="You_cannot_rename_elements_that_are_defined_in_metadata">
+        <source>You cannot rename elements that are defined in metadata.</source>
+        <target state="translated">Нельзя переименовать элементы, определенные в метаданных.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="You_cannot_rename_operators">
+        <source>You cannot rename operators.</source>
+        <target state="translated">Нельзя переименовать операторы.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="You_cannot_rename_this_element">
+        <source>You cannot rename this element.</source>
+        <target state="translated">Этот элемент переименовать нельзя.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="You_must_rename_an_identifier">
+        <source>You must rename an identifier.</source>
+        <target state="translated">Необходимо переименовать идентификатор.</target>
         <note />
       </trans-unit>
       <trans-unit id="_0_bases">
@@ -3045,6 +3205,11 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Здесь "{0}" имеет значение, отличное от NULL.</target>
         <note />
       </trans-unit>
+      <trans-unit id="_0_items_in_cache">
+        <source>'{0}' items in cache</source>
+        <target state="translated">Элементов в кэше: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="_0_literal_not_allowed">
         <source>'{0}' literal not allowed</source>
         <target state="translated">Литерал {0} не разрешен</target>
@@ -3055,9 +3220,19 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <target state="translated">Здесь "{0}" может иметь значение NULL.</target>
         <note />
       </trans-unit>
+      <trans-unit id="_0_reference_unquoted">
+        <source>{0} reference</source>
+        <target state="translated">Cсылок: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="_0_references">
         <source>'{0}' references</source>
         <target state="translated">Ссылки “{0}”</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_references_unquoted">
+        <source>{0} references</source>
+        <target state="translated">Ссылок: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="_0_unexpected">
@@ -3311,9 +3486,24 @@ If the "H" format specifier is used without other custom format specifiers, it's
         <target state="translated">и обновлять сайты вызовов напрямую</target>
         <note />
       </trans-unit>
+      <trans-unit id="class_name">
+        <source>&lt;class name&gt;</source>
+        <target state="translated">&lt;имя класса&gt;</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="class_with_explicit_or_sequential_layout">
+        <source>class with explicit or sequential layout</source>
+        <target state="translated">класс с явной или последовательной компоновкой</target>
+        <note />
+      </trans-unit>
       <trans-unit id="code">
         <source>code</source>
         <target state="translated">код</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="console_writeline">
+        <source>Console.WriteLine</source>
+        <target state="translated">Console.WriteLine</target>
         <note />
       </trans-unit>
       <trans-unit id="date_separator">
@@ -3383,6 +3573,11 @@ If the "d" format specifier is used without other custom format specifiers, it's
         <target state="translated">отменить</target>
         <note />
       </trans-unit>
+      <trans-unit id="else_statement">
+        <source>else statement</source>
+        <target state="translated">инструкция else</target>
+        <note />
+      </trans-unit>
       <trans-unit id="embedded">
         <source>embedded</source>
         <target state="translated">внедренный</target>
@@ -3392,6 +3587,11 @@ If the "d" format specifier is used without other custom format specifiers, it's
         <source>external</source>
         <target state="translated">внешний</target>
         <note>External means "external source", meaning source files that are not part of the current solution</note>
+      </trans-unit>
+      <trans-unit id="foreach_loop">
+        <source>foreach loop</source>
+        <target state="translated">Цикл ForEach</target>
+        <note />
       </trans-unit>
       <trans-unit id="from_metadata">
         <source>from metadata</source>
@@ -3452,6 +3652,16 @@ The "f" standard format specifier represents a combination of the long date ("D"
         <target state="translated">универсальные перегрузки</target>
         <note />
       </trans-unit>
+      <trans-unit id="get_only_property">
+        <source>get-only property</source>
+        <target state="translated">свойство, предназначенное только для получения</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="if_statement">
+        <source>if statement</source>
+        <target state="translated">оператор if</target>
+        <note />
+      </trans-unit>
       <trans-unit id="in_0_1_2">
         <source>in {0} ({1} - {2})</source>
         <target state="translated">в {0} ({1} — {2})</target>
@@ -3460,6 +3670,11 @@ The "f" standard format specifier represents a combination of the long date ("D"
       <trans-unit id="in_Source_attribute">
         <source>in Source (attribute)</source>
         <target state="translated">в источнике (атрибут)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="interface_name">
+        <source>&lt;interface name&gt;</source>
+        <target state="translated">&lt;имя интерфейса&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="into_extracted_method_to_invoke_at_call_sites">
@@ -3580,6 +3795,11 @@ If the "M" format specifier is used without other custom format specifiers, it's
         <target state="translated">Описатель пользовательского формата "MMMM" представляет полное название месяца. Локализованное название месяца извлекается из свойства DateTimeFormatInfo.MonthNames текущих или заданных языка и региональных параметров.</target>
         <note />
       </trans-unit>
+      <trans-unit id="namespace_name">
+        <source>&lt;namespace name&gt;</source>
+        <target state="translated">&lt;имя пространства имен&gt;</target>
+        <note />
+      </trans-unit>
       <trans-unit id="overload">
         <source>overload</source>
         <target state="translated">перегрузка</target>
@@ -3623,11 +3843,6 @@ If the "M" format specifier is used without other custom format specifiers, it's
       <trans-unit id="Could_not_extract_interface_colon_The_type_does_not_contain_any_member_that_can_be_extracted_to_an_interface">
         <source>Could not extract interface: The type does not contain any member that can be extracted to an interface.</source>
         <target state="translated">Не удалось извлечь интерфейс: тип не содержит никаких членов, которые можно извлечь в интерфейс.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="can_t_not_construct_final_tree">
-        <source>can't not construct final tree</source>
-        <target state="translated">не удается создать итоговое дерево</target>
         <note />
       </trans-unit>
       <trans-unit id="Parameters_type_or_return_type_cannot_be_an_anonymous_type_colon_bracket_0_bracket">
@@ -3680,16 +3895,6 @@ If the "M" format specifier is used without other custom format specifiers, it's
         <target state="translated">Создать делегирующий конструктор "{0}({1})"</target>
         <note />
       </trans-unit>
-      <trans-unit id="Generate_constructor_0_1">
-        <source>Generate constructor '{0}({1})'</source>
-        <target state="translated">Создать конструктор "{0}({1})"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_field_assigning_constructor_0_1">
-        <source>Generate field assigning constructor '{0}({1})'</source>
-        <target state="translated">Создать назначающий поля конструктор "{0}({1})"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Generate_Equals_and_GetHashCode">
         <source>Generate Equals and GetHashCode</source>
         <target state="translated">Создать Equals и GetHashCode</target>
@@ -3705,21 +3910,6 @@ If the "M" format specifier is used without other custom format specifiers, it's
         <target state="translated">Создать "GetHashCode()"</target>
         <note />
       </trans-unit>
-      <trans-unit id="Generate_constructor_in_0">
-        <source>Generate constructor in '{0}'</source>
-        <target state="translated">Создайте конструктор в "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_all">
-        <source>Generate all</source>
-        <target state="translated">Создать все</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_local_0">
-        <source>Generate local '{0}'</source>
-        <target state="translated">Создайте локальную переменную "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Generate_0_1_in_new_file">
         <source>Generate {0} '{1}' in new file</source>
         <target state="translated">Создать {0} "{1}" в новом файле</target>
@@ -3728,21 +3918,6 @@ If the "M" format specifier is used without other custom format specifiers, it's
       <trans-unit id="Generate_nested_0_1">
         <source>Generate nested {0} '{1}'</source>
         <target state="translated">Создать вложенный {0} "{1}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Implement_interface_abstractly">
-        <source>Implement interface abstractly</source>
-        <target state="translated">Реализовать интерфейс абстрактно</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Implement_interface_through_0">
-        <source>Implement interface through '{0}'</source>
-        <target state="translated">Реализовать интерфейс через "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Implement_interface">
-        <source>Implement interface</source>
-        <target state="translated">Реализовать интерфейс</target>
         <note />
       </trans-unit>
       <trans-unit id="Introduce_field_for_0">
@@ -3884,11 +4059,6 @@ If the "g" format specifier is used without other custom format specifiers, it's
         <target state="translated">Возврат:</target>
         <note />
       </trans-unit>
-      <trans-unit id="Exceptions_colon">
-        <source>Exceptions:</source>
-        <target state="translated">Исключения:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Remarks_colon">
         <source>Remarks:</source>
         <target state="translated">Примечания:</target>
@@ -3970,16 +4140,6 @@ Do you want to continue?</source>
 "{1}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="Simplify_Names">
-        <source>Simplify Names</source>
-        <target state="translated">Упрощение имен</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Simplify_Member_Access">
-        <source>Simplify Member Access</source>
-        <target state="translated">Упрощение доступа для членов</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Remove_qualification">
         <source>Remove qualification</source>
         <target state="translated">Удалить квалификацию</target>
@@ -4035,16 +4195,6 @@ Do you want to continue?</source>
         <target state="translated">Примечание. Два раза нажмите клавишу TAB, чтобы вставить фрагмент кода "{0}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="Implement_interface_explicitly_with_Dispose_pattern">
-        <source>Implement interface explicitly with Dispose pattern</source>
-        <target state="translated">Явно внедрите интерфейс с шаблоном освобождения</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Implement_interface_with_Dispose_pattern">
-        <source>Implement interface with Dispose pattern</source>
-        <target state="translated">Внедрите интерфейс с шаблоном освобождения</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Computing_fix_all_occurrences_code_fix">
         <source>Computing fix all occurrences code fix...</source>
         <target state="translated">Вычисление изменения кода для исправления всех вхождений...</target>
@@ -4068,16 +4218,6 @@ Do you want to continue?</source>
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">Решение</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TODO_colon_dispose_managed_state_managed_objects">
-        <source>TODO: dispose managed state (managed objects)</source>
-        <target state="translated">TODO: освободить управляемое состояние (управляемые объекты)</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TODO_colon_set_large_fields_to_null">
-        <source>TODO: set large fields to null</source>
-        <target state="translated">TODO: установить значение NULL для больших полей</target>
         <note />
       </trans-unit>
       <trans-unit id="Compiler2">
@@ -4245,10 +4385,20 @@ When this standard format specifier is used, the formatting or parsing operation
         <target state="translated">статический конструктор</target>
         <note />
       </trans-unit>
+      <trans-unit id="struct_">
+        <source>struct</source>
+        <target state="translated">структура</target>
+        <note />
+      </trans-unit>
       <trans-unit id="symbol_cannot_be_a_namespace">
         <source>'symbol' cannot be a namespace.</source>
         <target state="translated">'"символ" не может быть пространством имен.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="symbol_kind_and_name_of_member_kind_and_name">
+        <source>{0} '{1}' of {2} '{3}'</source>
+        <target state="translated">{0} ' {1} ' из {2} ' {3} '</target>
+        <note>e.g. "parameter 'T param' of method 'M'"</note>
       </trans-unit>
       <trans-unit id="time_separator">
         <source>time separator</source>
@@ -4378,11 +4528,6 @@ If the "K" format specifier is used without other custom format specifiers, it's
         <target state="translated">Не удалось загрузить сборку анализатора {0}: {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="Make_method_synchronous">
-        <source>Make method synchronous</source>
-        <target state="translated">Преобразовать метод в синхронный</target>
-        <note />
-      </trans-unit>
       <trans-unit id="from_0">
         <source>from {0}</source>
         <target state="translated">из {0}</target>
@@ -4423,11 +4568,6 @@ This version used in: {2}</source>
       <trans-unit id="Install_version_0">
         <source>Install version '{0}'</source>
         <target state="translated">Установить версию "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_variable_0">
-        <source>Generate variable '{0}'</source>
-        <target state="translated">Создать переменную "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Classes">
@@ -4545,16 +4685,6 @@ This version used in: {2}</source>
         <target state="translated">Переименовать тип в {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="Remove_tag">
-        <source>Remove tag</source>
-        <target state="translated">Удалить тег</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Add_missing_param_nodes">
-        <source>Add missing param nodes</source>
-        <target state="translated">Добавить отсутствующие узлы параметров</target>
-        <note />
-      </trans-unit>
       <trans-unit id="paren_Unknown_paren">
         <source>(Unknown)</source>
         <target state="translated">(Неизвестно)</target>
@@ -4610,26 +4740,6 @@ This version used in: {2}</source>
         <target state="translated">Добавить имя аргумента "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="Take_0">
-        <source>Take '{0}'</source>
-        <target state="translated">Принимать "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Take_both">
-        <source>Take both</source>
-        <target state="translated">Принимать оба</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Take_bottom">
-        <source>Take bottom</source>
-        <target state="translated">Принимать нижнее</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Take_top">
-        <source>Take top</source>
-        <target state="translated">Принимать верхнее</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Remove_unused_variable">
         <source>Remove unused variable</source>
         <target state="translated">Удалить неиспользуемые переменные</target>
@@ -4668,16 +4778,6 @@ This version used in: {2}</source>
       <trans-unit id="Remove_separators">
         <source>Remove separators</source>
         <target state="translated">Удалить разделители</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Add_parameter_to_0">
-        <source>Add parameter to '{0}'</source>
-        <target state="translated">Добавить параметр в "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Generate_constructor">
-        <source>Generate constructor...</source>
-        <target state="translated">Создать конструктор...</target>
         <note />
       </trans-unit>
       <trans-unit id="Pick_members_to_be_used_as_constructor_parameters">
@@ -4726,8 +4826,8 @@ This version used in: {2}</source>
         <note />
       </trans-unit>
       <trans-unit id="Add_null_checks">
-        <source>Add null checks</source>
-        <target state="translated">Добавить проверки значений NULL</target>
+        <source>Add _null checks</source>
+        <target state="translated">Добавить проверки значений _null</target>
         <note />
       </trans-unit>
       <trans-unit id="Generate_operators">
@@ -4900,6 +5000,11 @@ The offset is always displayed with a leading sign. A plus sign (+) indicates ho
 При использовании значений DateTimeOffset этот описатель формата представляет смещение значения DateTimeOffset от UTC в часах.
 
 Смещение всегда отображается с предшествующим знаком. Знак "плюс" (+) обозначает часы опережения UTC, а знак "минус" (-) — часы отставания от UTC. Смещение из одной цифры форматируется с начальным нулем.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="while_loop">
+        <source>while loop</source>
+        <target state="translated">Цикл while</target>
         <note />
       </trans-unit>
       <trans-unit id="x_y_range_in_reverse_order">

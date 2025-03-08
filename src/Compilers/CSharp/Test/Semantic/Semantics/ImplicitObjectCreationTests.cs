@@ -95,9 +95,15 @@ class C
                 // (10,16): error CS8400: Feature 'target-typed object creation' is not available in C# 8.0. Please use language version 9.0 or greater.
                 //         C v1 = new();
                 Diagnostic(ErrorCode.ERR_FeatureNotAvailableInVersion8, "new").WithArguments("target-typed object creation", "9.0").WithLocation(10, 16),
+                // (11,11): warning CS0219: The variable 'v2' is assigned but its value is never used
+                //         S v2 = new();
+                Diagnostic(ErrorCode.WRN_UnreferencedVarAssg, "v2").WithArguments("v2").WithLocation(11, 11),
                 // (11,16): error CS8400: Feature 'target-typed object creation' is not available in C# 8.0. Please use language version 9.0 or greater.
                 //         S v2 = new();
                 Diagnostic(ErrorCode.ERR_FeatureNotAvailableInVersion8, "new").WithArguments("target-typed object creation", "9.0").WithLocation(11, 16),
+                // (12,12): warning CS0219: The variable 'v3' is assigned but its value is never used
+                //         S? v3 = new();
+                Diagnostic(ErrorCode.WRN_UnreferencedVarAssg, "v3").WithArguments("v3").WithLocation(12, 12),
                 // (12,17): error CS8400: Feature 'target-typed object creation' is not available in C# 8.0. Please use language version 9.0 or greater.
                 //         S? v3 = new();
                 Diagnostic(ErrorCode.ERR_FeatureNotAvailableInVersion8, "new").WithArguments("target-typed object creation", "9.0").WithLocation(12, 17),
@@ -118,8 +124,7 @@ class C
                 Diagnostic(ErrorCode.ERR_FeatureNotAvailableInVersion8, "new").WithArguments("target-typed object creation", "9.0").WithLocation(15, 17),
                 // (15,21): error CS0103: The name 'missing' does not exist in the current context
                 //         S? v6 = new(missing);
-                Diagnostic(ErrorCode.ERR_NameNotInContext, "missing").WithArguments("missing").WithLocation(15, 21)
-                );
+                Diagnostic(ErrorCode.ERR_NameNotInContext, "missing").WithArguments("missing").WithLocation(15, 21));
 
             var tree = comp.SyntaxTrees.First();
             var model = comp.GetSemanticModel(tree);
@@ -2614,12 +2619,12 @@ class C
 ";
             var comp = CreateCompilation(source);
             comp.VerifyDiagnostics(
-                // (8,18): error CS0150: A constant value is expected
+                // (8,18): error CS9135: A constant value of type 'C' is expected
                 //             case new():
-                Diagnostic(ErrorCode.ERR_ConstantExpected, "new()").WithLocation(8, 18),
-                // (9,19): error CS0150: A constant value is expected
+                Diagnostic(ErrorCode.ERR_ConstantValueOfTypeExpected, "new()").WithArguments("C").WithLocation(8, 18),
+                // (9,19): error CS9135: A constant value of type 'C' is expected
                 //             case (new()):
-                Diagnostic(ErrorCode.ERR_ConstantExpected, "new()").WithLocation(9, 19)
+                Diagnostic(ErrorCode.ERR_ConstantValueOfTypeExpected, "new()").WithArguments("C").WithLocation(9, 19)
                 );
         }
 
@@ -3712,9 +3717,9 @@ class C
                 // (8,19): error CS8754: There is no target type for 'new()'
                 //         bool v3 = new() is new();
                 Diagnostic(ErrorCode.ERR_ImplicitObjectCreationNoTargetType, "new()").WithArguments("new()").WithLocation(8, 19),
-                // (10,27): error CS0150: A constant value is expected
+                // (10,27): error CS9135: A constant value of type 'C' is expected
                 //         bool v5 = this is new();
-                Diagnostic(ErrorCode.ERR_ConstantExpected, "new()").WithLocation(10, 27)
+                Diagnostic(ErrorCode.ERR_ConstantValueOfTypeExpected, "new()").WithArguments("C").WithLocation(10, 27)
                 );
         }
 
@@ -4578,6 +4583,147 @@ class X
             Assert.Equal(0, symbolInfo.CandidateSymbols.Length);
         }
 
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/76499")]
+        public void PublicAPI_01()
+        {
+            // target-typed object creation
+            var source = """
+                static A Do()
+                {
+                    return new("ASD");
+                }
+
+                public record class A(string Id, int Count);
+                """;
+
+            var comp = CreateCompilation(source, targetFramework: TargetFramework.NetCoreApp, parseOptions: TestOptions.RegularPreview);
+            comp.VerifyEmitDiagnostics(
+                // (1,10): warning CS8321: The local function 'Do' is declared but never used
+                // static A Do()
+                Diagnostic(ErrorCode.WRN_UnreferencedLocalFunction, "Do").WithArguments("Do").WithLocation(1, 10),
+                // (3,12): error CS7036: There is no argument given that corresponds to the required parameter 'Count' of 'A.A(string, int)'
+                //     return new("ASD");
+                Diagnostic(ErrorCode.ERR_NoCorrespondingArgument, @"new(""ASD"")").WithArguments("Count", "A.A(string, int)").WithLocation(3, 12));
+
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+            var node = tree.GetRoot().DescendantNodes().OfType<ImplicitObjectCreationExpressionSyntax>().Single();
+            var typeInfo = model.GetTypeInfo(node);
+            Assert.Equal("A", typeInfo.Type.ToTestDisplayString());
+
+            var members = model.GetMemberGroup(node).SelectAsArray(m => m.ToTestDisplayString());
+            AssertEx.SequenceEqual(["A..ctor(System.String Id, System.Int32 Count)"], members);
+        }
+
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/76499")]
+        public void PublicAPI_02()
+        {
+            // target-typed object creation with syntax errors
+            var source = """
+                static A Do()
+                {
+                    return new("ASD",);
+                }
+
+                public record class A(string Id, int Count);
+                """;
+
+            var comp = CreateCompilation(source, targetFramework: TargetFramework.NetCoreApp, parseOptions: TestOptions.RegularPreview);
+            comp.VerifyEmitDiagnostics(
+                // (1,10): warning CS8321: The local function 'Do' is declared but never used
+                // static A Do()
+                Diagnostic(ErrorCode.WRN_UnreferencedLocalFunction, "Do").WithArguments("Do").WithLocation(1, 10),
+                // (3,22): error CS1525: Invalid expression term ')'
+                //     return new("ASD",);
+                Diagnostic(ErrorCode.ERR_InvalidExprTerm, ")").WithArguments(")").WithLocation(3, 22));
+
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+            var node = tree.GetRoot().DescendantNodes().OfType<ImplicitObjectCreationExpressionSyntax>().Single();
+            var typeInfo = model.GetTypeInfo(node);
+            Assert.Equal("A", typeInfo.Type.ToTestDisplayString());
+
+            var members = model.GetMemberGroup(node).SelectAsArray(m => m.ToTestDisplayString());
+            AssertEx.SequenceEqual(["A..ctor(System.String Id, System.Int32 Count)"], members);
+        }
+
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/76499")]
+        public void PublicAPI_03()
+        {
+            // explicitly-typed object creation with syntax errors
+            var source = """
+                static A Do()
+                {
+                    return new A("ASD",);
+                }
+
+                public record class A(string Id, int Count);
+                """;
+
+            var comp = CreateCompilation(source, targetFramework: TargetFramework.NetCoreApp, parseOptions: TestOptions.RegularPreview);
+            comp.VerifyEmitDiagnostics(
+                // (1,10): warning CS8321: The local function 'Do' is declared but never used
+                // static A Do()
+                Diagnostic(ErrorCode.WRN_UnreferencedLocalFunction, "Do").WithArguments("Do").WithLocation(1, 10),
+                // (3,24): error CS1525: Invalid expression term ')'
+                //     return new A("ASD",);
+                Diagnostic(ErrorCode.ERR_InvalidExprTerm, ")").WithArguments(")").WithLocation(3, 24));
+
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+            var node = tree.GetRoot().DescendantNodes().OfType<ObjectCreationExpressionSyntax>().Single();
+            var typeInfo = model.GetTypeInfo(node);
+            Assert.Equal("A", typeInfo.Type.ToTestDisplayString());
+
+            var members = model.GetMemberGroup(node).SelectAsArray(m => m.ToTestDisplayString());
+            AssertEx.SequenceEqual(["A..ctor(System.String Id, System.Int32 Count)"], members);
+        }
+
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/76499")]
+        public void Repro_76499_2()
+        {
+            // explicit and target-typed object creation with syntax errors
+            // using non-records and overloaded constructors
+            var source = """
+                class C
+                {
+                    public C(int x, int y) { }
+                    public C(int x, int y, int z) { }
+
+                    public static void M()
+                    {
+                        C c1 = new C(1,);
+                        C c2 = new(1,);
+                    }
+                }
+                """;
+
+            var comp = CreateCompilation(source, targetFramework: TargetFramework.NetCoreApp);
+            comp.VerifyEmitDiagnostics(
+                // (8,24): error CS1525: Invalid expression term ')'
+                //         C c1 = new C(1,);
+                Diagnostic(ErrorCode.ERR_InvalidExprTerm, ")").WithArguments(")").WithLocation(8, 24),
+                // (9,22): error CS1525: Invalid expression term ')'
+                //         C c2 = new(1,);
+                Diagnostic(ErrorCode.ERR_InvalidExprTerm, ")").WithArguments(")").WithLocation(9, 22));
+
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+
+            var node = tree.GetRoot().DescendantNodes().OfType<ImplicitObjectCreationExpressionSyntax>().Single();
+            var typeInfo = model.GetTypeInfo(node);
+            Assert.Equal("C", typeInfo.Type.ToTestDisplayString());
+            var members = model.GetMemberGroup(node).SelectAsArray(m => m.ToTestDisplayString());
+            string[] expectedMembers = ["C..ctor(System.Int32 x, System.Int32 y)", "C..ctor(System.Int32 x, System.Int32 y, System.Int32 z)"];
+            AssertEx.SequenceEqual(expectedMembers, members);
+
+            var explicitCreationNode = tree.GetRoot().DescendantNodes().OfType<ObjectCreationExpressionSyntax>().Single();
+            typeInfo = model.GetTypeInfo(node);
+            Assert.Equal("C", typeInfo.Type.ToTestDisplayString());
+            members = model.GetMemberGroup(explicitCreationNode).SelectAsArray(m => m.ToTestDisplayString());
+            AssertEx.SequenceEqual(expectedMembers, members);
+        }
+
         [Fact]
         [WorkItem(50489, "https://github.com/dotnet/roslyn/issues/50489")]
         public void InEarlyWellknownAttribute_01()
@@ -4701,7 +4847,7 @@ public class C : System.Attribute
                 // (2,2): error CS0181: Attribute constructor parameter 'c' has type 'C', which is not a valid attribute parameter type
                 // [C(new())]
                 Diagnostic(ErrorCode.ERR_BadAttributeParamType, "C").WithArguments("c", "C").WithLocation(2, 2),
-                // (2,4): error CS7036: There is no argument given that corresponds to the required formal parameter 'c' of 'C.C(C)'
+                // (2,4): error CS7036: There is no argument given that corresponds to the required parameter 'c' of 'C.C(C)'
                 // [C(new())]
                 Diagnostic(ErrorCode.ERR_NoCorrespondingArgument, "new()").WithArguments("c", "C.C(C)").WithLocation(2, 4)
                 );
@@ -4853,7 +4999,7 @@ class C
                 // (13,18): error CS0150: A constant value is expected
                 //         if (t is new T()) { } // 4
                 Diagnostic(ErrorCode.ERR_ConstantExpected, "new T()").WithLocation(13, 18)
-                );
+            );
         }
 
         [Fact, WorkItem(60960, "https://github.com/dotnet/roslyn/issues/60960")]

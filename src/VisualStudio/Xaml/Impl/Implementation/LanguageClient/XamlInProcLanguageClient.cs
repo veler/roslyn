@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Editor;
 using Microsoft.CodeAnalysis.Editor.Implementation.LanguageClient;
 using Microsoft.CodeAnalysis.Editor.Shared.Utilities;
@@ -13,9 +12,9 @@ using Microsoft.CodeAnalysis.Editor.Xaml;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.LanguageServer;
 using Microsoft.CodeAnalysis.Options;
-using Microsoft.CodeAnalysis.Shared.TestHooks;
+using Microsoft.VisualStudio.Composition;
 using Microsoft.VisualStudio.LanguageServer.Client;
-using Microsoft.VisualStudio.LanguageServer.Protocol;
+using Roslyn.LanguageServer.Protocol;
 using Microsoft.VisualStudio.LanguageServices.Xaml.LanguageServer;
 using Microsoft.VisualStudio.Utilities;
 
@@ -34,14 +33,14 @@ namespace Microsoft.VisualStudio.LanguageServices.Xaml
         public XamlInProcLanguageClient(
             XamlLspServiceProvider lspServiceProvider,
             IGlobalOptionService globalOptions,
-            IAsynchronousOperationListenerProvider listenerProvider,
-            ILspLoggerFactory lspLoggerFactory,
-            IThreadingContext threadingContext)
-            : base(lspServiceProvider, globalOptions, listenerProvider, lspLoggerFactory, threadingContext)
+            ILspServiceLoggerFactory lspLoggerFactory,
+            IThreadingContext threadingContext,
+            ExportProvider exportProvider)
+            : base(lspServiceProvider, globalOptions, lspLoggerFactory, threadingContext, exportProvider)
         {
         }
 
-        protected override ImmutableArray<string> SupportedLanguages => ImmutableArray.Create(StringConstants.XamlLanguageName);
+        protected override ImmutableArray<string> SupportedLanguages => [StringConstants.XamlLanguageName];
 
         public override ServerCapabilities GetCapabilities(ClientCapabilities clientCapabilities)
         {

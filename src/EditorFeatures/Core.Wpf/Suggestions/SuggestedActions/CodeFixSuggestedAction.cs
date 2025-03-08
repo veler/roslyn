@@ -26,13 +26,20 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.Suggestions
             IThreadingContext threadingContext,
             SuggestedActionsSourceProvider sourceProvider,
             Workspace workspace,
+            TextDocument originalDocument,
             ITextBuffer subjectBuffer,
             CodeFix fix,
             object provider,
             CodeAction action,
             SuggestedActionSet fixAllFlavors)
-            : base(threadingContext, sourceProvider, workspace, subjectBuffer,
-                   provider, action, fixAllFlavors)
+            : base(threadingContext,
+                   sourceProvider,
+                   workspace,
+                   originalDocument,
+                   subjectBuffer,
+                   provider,
+                   action,
+                   fixAllFlavors)
         {
             CodeFix = fix;
         }

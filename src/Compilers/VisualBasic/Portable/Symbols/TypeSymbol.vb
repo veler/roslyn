@@ -261,6 +261,11 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             End Get
         End Property
 
+        ' <summary>
+        ' Indicates whether a type is managed or not in C# terms (i.e. you can take a pointer to it).
+        ' </summary>
+        Friend MustOverride Function GetManagedKind(ByRef useSiteInfo As CompoundUseSiteInfo(Of AssemblySymbol)) As ManagedKind
+
         ' Only the compiler can create TypeSymbols.
         Friend Sub New()
         End Sub
@@ -273,9 +278,15 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
         ''' <summary>
         ''' Gets corresponding special TypeId of this type.
         ''' </summary>
-        Public Overridable ReadOnly Property SpecialType As SpecialType Implements ITypeSymbol.SpecialType, ITypeSymbolInternal.SpecialType
+        Public Overridable ReadOnly Property ExtendedSpecialType As ExtendedSpecialType
             Get
-                Return SpecialType.None
+                Return Nothing
+            End Get
+        End Property
+
+        Public ReadOnly Property SpecialType As SpecialType Implements ITypeSymbol.SpecialType, ITypeSymbolInternal.SpecialType
+            Get
+                Return CType(ExtendedSpecialType, SpecialType)
             End Get
         End Property
 
@@ -355,7 +366,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
         ''' Type name.
         ''' </param>
         ''' <returns>
-        ''' Symbol for the type, or MissingMetadataSymbol if the type isn't found.
+        ''' Symbol for the type, or Nothing if the type isn't found.
         ''' </returns>
         ''' <remarks></remarks>
         Friend Overridable Function LookupMetadataType(ByRef emittedTypeName As MetadataTypeName) As NamedTypeSymbol
@@ -425,10 +436,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
             End If
 
 Done:
-            If namedType Is Nothing Then
-                Return New MissingMetadataTypeSymbol.Nested(DirectCast(Me, NamedTypeSymbol), emittedTypeName)
-            End If
-
             Return namedType
         End Function
 
@@ -586,8 +593,7 @@ Done:
 
         Private ReadOnly Property ITypeSymbol_IsUnmanagedType As Boolean Implements ITypeSymbol.IsUnmanagedType
             Get
-                ' VB has no concept of unmanaged types
-                Return False
+                Return GetManagedKind(CompoundUseSiteInfo(Of AssemblySymbol).Discarded) <> ManagedKind.Managed
             End Get
         End Property
 
@@ -671,7 +677,6 @@ Done:
                 Return If(Interlocked.CompareExchange(_lazyImplementationForInterfaceMemberMap, map, Nothing), map)
             End Get
         End Property
-
 
         ''' <summary>
         ''' Compute the implementation for an interface member in this type, or Nothing if none.

@@ -11,20 +11,11 @@ using Roslyn.Utilities;
 
 namespace Microsoft.CodeAnalysis.CSharp.Completion.KeywordRecommenders;
 
-internal class RequiredKeywordRecommender : AbstractSyntacticSingleKeywordRecommender
+internal sealed class RequiredKeywordRecommender() : AbstractSyntacticSingleKeywordRecommender(SyntaxKind.RequiredKeyword)
 {
     private static readonly ISet<SyntaxKind> s_validModifiers = SyntaxKindSet.AllMemberModifiers.Where(s => s is not (SyntaxKind.RequiredKeyword or SyntaxKind.StaticKeyword or SyntaxKind.ReadOnlyKeyword or SyntaxKind.ConstKeyword)).ToSet();
 
-    private static readonly ISet<SyntaxKind> s_validTypeDeclarations = new HashSet<SyntaxKind>(SyntaxFacts.EqualityComparer)
-    {
-        SyntaxKind.StructDeclaration,
-        SyntaxKind.ClassDeclaration,
-    };
-
-    public RequiredKeywordRecommender()
-        : base(SyntaxKind.RequiredKeyword)
-    {
-    }
+    private static readonly ISet<SyntaxKind> s_validTypeDeclarations = SyntaxKindSet.ClassStructRecordTypeDeclarations;
 
     protected override bool IsValidContext(int position, CSharpSyntaxContext context, CancellationToken cancellationToken)
     {

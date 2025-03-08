@@ -37,7 +37,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             Debug.Assert(this.IsFixedSizeBuffer);
         }
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<SynthesizedAttributeData> attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
 
@@ -94,7 +94,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                             // GetAndValidateConstantValue doesn't generate a very intuitive-reading diagnostic
                             // for this situation, but this is what the Dev10 compiler produces.
-                            ConstantValue sizeConstant = ConstantValueUtils.GetAndValidateConstantValue(boundSizeExpression, this, intType, sizeExpression.Location, diagnostics);
+                            ConstantValue sizeConstant = ConstantValueUtils.GetAndValidateConstantValue(boundSizeExpression, this, intType, sizeExpression, diagnostics);
 
                             Debug.Assert(sizeConstant != null);
                             Debug.Assert(sizeConstant.IsIntegral || diagnostics.HasAnyErrors() || sizeExpression.HasErrors);
@@ -153,7 +153,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         private readonly FieldSymbol _internalField;
 
         public FixedFieldImplementationType(SourceMemberFieldSymbol field)
-            : base(GeneratedNames.MakeFixedFieldImplementationName(field.Name), typeParameters: ImmutableArray<TypeParameterSymbol>.Empty, typeMap: TypeMap.Empty)
+            : base(GeneratedNames.MakeFixedFieldImplementationName(field.Name))
         {
             _field = field;
             _constructor = new SynthesizedInstanceConstructor(this);
@@ -203,7 +203,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _internalField; }
         }
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<SynthesizedAttributeData> attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
             var compilation = ContainingSymbol.DeclaringCompilation;
@@ -237,7 +237,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             => ContainingAssembly.GetSpecialType(SpecialType.System_ValueType);
 
         public sealed override bool AreLocalsZeroed
-            => throw ExceptionUtilities.Unreachable;
+            => throw ExceptionUtilities.Unreachable();
 
         internal override bool IsRecord => false;
         internal override bool IsRecordStruct => false;

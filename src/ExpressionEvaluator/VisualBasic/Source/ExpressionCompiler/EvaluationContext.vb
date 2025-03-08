@@ -65,7 +65,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
         ''' Create a context for evaluating expressions at a type scope.
         ''' </summary>
         ''' <param name="compilation">Compilation.</param>
-        ''' <param name="moduleVersionId">Module containing type.</param>
+        ''' <param name="moduleId">Module containing type.</param>
         ''' <param name="typeToken">Type metadata token.</param>
         ''' <returns>Evaluation context.</returns>
         ''' <remarks>
@@ -73,12 +73,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
         ''' </remarks>
         Friend Shared Function CreateTypeContext(
             compilation As VisualBasicCompilation,
-            moduleVersionId As Guid,
+            moduleId As ModuleId,
             typeToken As Integer) As EvaluationContext
 
             Debug.Assert(MetadataTokens.Handle(typeToken).Kind = HandleKind.TypeDefinition)
 
-            Dim currentType = compilation.GetType(moduleVersionId, typeToken)
+            Dim currentType = compilation.GetType(moduleId, typeToken)
             Debug.Assert(currentType IsNot Nothing)
 
             Dim currentFrame = New SynthesizedContextMethodSymbol(currentType)
@@ -97,8 +97,8 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
         ''' </summary>
         ''' <param name="previous">Previous context, if any, for possible re-use.</param>
         ''' <param name="metadataBlocks">Module metadata.</param>
-        ''' <param name="symReader"><see cref="ISymUnmanagedReader"/> for PDB associated with <paramref name="moduleVersionId"/>.</param>
-        ''' <param name="moduleVersionId">Module containing method.</param>
+        ''' <param name="symReader"><see cref="ISymUnmanagedReader"/> for PDB associated with <paramref name="moduleId"/>.</param>
+        ''' <param name="moduleId">Module containing method.</param>
         ''' <param name="methodToken">Method metadata token.</param>
         ''' <param name="methodVersion">Method version.</param>
         ''' <param name="ilOffset">IL offset of instruction pointer in method.</param>
@@ -109,7 +109,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
             metadataBlocks As ImmutableArray(Of MetadataBlock),
             lazyAssemblyReaders As Lazy(Of ImmutableArray(Of AssemblyReaders)),
             symReader As Object,
-            moduleVersionId As Guid,
+            moduleId As ModuleId,
             methodToken As Integer,
             methodVersion As Integer,
             ilOffset As UInteger,
@@ -123,7 +123,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
                 compilation,
                 lazyAssemblyReaders,
                 symReader,
-                moduleVersionId,
+                moduleId,
                 methodToken,
                 methodVersion,
                 offset,
@@ -134,8 +134,8 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
         ''' Create a context for evaluating expressions within a method scope.
         ''' </summary>
         ''' <param name="compilation">Compilation.</param>
-        ''' <param name="symReader"><see cref="ISymUnmanagedReader"/> for PDB associated with <paramref name="moduleVersionId"/>.</param>
-        ''' <param name="moduleVersionId">Module containing method.</param>
+        ''' <param name="symReader"><see cref="ISymUnmanagedReader"/> for PDB associated with <paramref name="moduleId"/>.</param>
+        ''' <param name="moduleId">Module containing method.</param>
         ''' <param name="methodToken">Method metadata token.</param>
         ''' <param name="methodVersion">Method version.</param>
         ''' <param name="ilOffset">IL offset of instruction pointer in method.</param>
@@ -145,17 +145,17 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
             compilation As VisualBasicCompilation,
             lazyAssemblyReaders As Lazy(Of ImmutableArray(Of AssemblyReaders)),
             symReader As Object,
-            moduleVersionId As Guid,
+            moduleId As ModuleId,
             methodToken As Integer,
             methodVersion As Integer,
             ilOffset As Integer,
             localSignatureToken As Integer) As EvaluationContext
 
             Dim methodHandle = CType(MetadataTokens.Handle(methodToken), MethodDefinitionHandle)
-            Dim currentSourceMethod = compilation.GetSourceMethod(moduleVersionId, methodHandle)
+            Dim currentSourceMethod = compilation.GetSourceMethod(moduleId, methodHandle)
             Dim localSignatureHandle = If(localSignatureToken <> 0, CType(MetadataTokens.Handle(localSignatureToken), StandaloneSignatureHandle), Nothing)
 
-            Dim currentFrame = compilation.GetMethod(moduleVersionId, methodHandle)
+            Dim currentFrame = compilation.GetMethod(moduleId, methodHandle)
             Debug.Assert(currentFrame IsNot Nothing)
             Dim symbolProvider = New VisualBasicEESymbolProvider(DirectCast(currentFrame.ContainingModule, PEModuleSymbol), currentFrame)
 
@@ -181,7 +181,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
             End If
 
             Dim localNames = debugInfo.LocalVariableNames.WhereAsArray(
-                Function(name) name Is Nothing OrElse Not name.StartsWith(GeneratedNameConstants.StateMachineHoistedUserVariablePrefix, StringComparison.Ordinal))
+                Function(name) name Is Nothing OrElse Not name.StartsWith(GeneratedNameConstants.StateMachineHoistedUserVariableOrDisplayClassPrefix, StringComparison.Ordinal))
 
             Dim localsBuilder = ArrayBuilder(Of LocalSymbol).GetInstance()
             MethodDebugInfo(Of TypeSymbol, LocalSymbol).GetLocals(localsBuilder, symbolProvider, localNames, localInfo, Nothing, debugInfo.TupleLocalMap)
@@ -190,7 +190,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
             localsBuilder.AddRange(debugInfo.LocalConstants)
 
             Return New EvaluationContext(
-                New MethodContextReuseConstraints(moduleVersionId, methodToken, methodVersion, reuseSpan),
+                New MethodContextReuseConstraints(moduleId, methodToken, methodVersion, reuseSpan),
                 compilation,
                 currentFrame,
                 currentSourceMethod,
@@ -204,7 +204,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
             For Each localName In allLocalNames
                 Dim hoistedLocalName As String = Nothing
                 Dim hoistedLocalSlot As Integer = 0
-                If localName IsNot Nothing AndAlso GeneratedNameParser.TryParseStateMachineHoistedUserVariableName(localName, hoistedLocalName, hoistedLocalSlot) Then
+                If localName IsNot Nothing AndAlso GeneratedNameParser.TryParseStateMachineHoistedUserVariableOrDisplayClassName(localName, hoistedLocalName, hoistedLocalSlot) Then
                     builder.Add(hoistedLocalSlot)
                 End If
             Next
@@ -263,13 +263,14 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
                 Try
                     For Each typeDefHandle In metadataReader.TypeDefinitions
                         Dim typeDef = metadataReader.GetTypeDefinition(typeDefHandle)
+                        Dim foundAttributeType = False
 
                         ' VB does ignores the StandardModuleAttribute on interfaces and nested
                         ' or generic types (see PENamedTypeSymbol.TypeKind).
                         If Not PEModule.IsNested(typeDef.Attributes) AndAlso
                             typeDef.GetGenericParameters().Count = 0 AndAlso
                             (typeDef.Attributes And TypeAttributes.[Interface]) = 0 AndAlso
-                            PEModule.FindTargetAttribute(metadataReader, typeDefHandle, AttributeDescription.StandardModuleAttribute).HasValue Then
+                            PEModule.FindTargetAttribute(metadataReader, typeDefHandle, AttributeDescription.StandardModuleAttribute, foundAttributeType).HasValue Then
 
                             Dim namespaceName = metadataReader.GetString(typeDef.Namespace)
                             [imports].Add(namespaceName)
@@ -326,7 +327,9 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
                 tupleLocalMap:=Nothing,
                 localVariableNames:=ImmutableArray(Of String).Empty,
                 localConstants:=ImmutableArray(Of LocalSymbol).Empty,
-                reuseSpan:=Nothing)
+                reuseSpan:=Nothing,
+                containingDocumentName:=Nothing,
+                isPrimaryConstructor:=False)
         End Function
 
         Friend Function CreateCompilationContext(withSyntax As Boolean) As CompilationContext

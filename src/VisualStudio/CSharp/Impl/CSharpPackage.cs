@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -11,13 +9,12 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.ErrorReporting;
 using Microsoft.CodeAnalysis.Host;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.VisualStudio.LanguageServices.CSharp.ObjectBrowser;
 using Microsoft.VisualStudio.LanguageServices.CSharp.ProjectSystemShim;
 using Microsoft.VisualStudio.LanguageServices.CSharp.ProjectSystemShim.Interop;
-using Microsoft.VisualStudio.LanguageServices.Implementation;
 using Microsoft.VisualStudio.LanguageServices.Implementation.LanguageService;
 using Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem;
-using Microsoft.VisualStudio.LanguageServices.Utilities;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
@@ -54,10 +51,11 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.LanguageService
     [ProvideLanguageEditorOptionPage(typeof(Options.Formatting.FormattingSpacingPage), "CSharp", @"Code Style\Formatting", "Spacing", pageNameResourceId: "#112", keywordListResourceId: 310)]
     [ProvideLanguageEditorOptionPage(typeof(Options.NamingStylesOptionPage), "CSharp", @"Code Style", "Naming", pageNameResourceId: "#115", keywordListResourceId: 314)]
     [ProvideLanguageEditorOptionPage(typeof(Options.IntelliSenseOptionPage), "CSharp", null, "IntelliSense", pageNameResourceId: "#103", keywordListResourceId: 312)]
+    [ProvideSettingsManifest(PackageRelativeManifestFile = @"UnifiedSettings\csharpSettings.registration.json")]
     [Guid(Guids.CSharpPackageIdString)]
     internal sealed class CSharpPackage : AbstractPackage<CSharpPackage, CSharpLanguageService>, IVsUserSettingsQuery
     {
-        private ObjectBrowserLibraryManager _libraryManager;
+        private ObjectBrowserLibraryManager? _libraryManager;
         private uint _libraryManagerCookie;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
@@ -65,7 +63,6 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.LanguageService
             try
             {
                 await base.InitializeAsync(cancellationToken, progress).ConfigureAwait(true);
-
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
                 this.RegisterService<ICSharpTempPECompilerService>(async ct =>
@@ -80,13 +77,13 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.LanguageService
             }
         }
 
-        protected override async Task RegisterObjectBrowserLibraryManagerAsync(CancellationToken cancellationToken)
+        protected override void RegisterObjectBrowserLibraryManager()
         {
+            Contract.ThrowIfFalse(JoinableTaskFactory.Context.IsOnMainThread);
+
             var workspace = this.ComponentModel.GetService<VisualStudioWorkspace>();
 
-            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-
-            if (await GetServiceAsync(typeof(SVsObjectManager)).ConfigureAwait(true) is IVsObjectManager2 objectManager)
+            if (GetService(typeof(SVsObjectManager)) is IVsObjectManager2 objectManager)
             {
                 _libraryManager = new ObjectBrowserLibraryManager(this, ComponentModel, workspace);
 
@@ -97,19 +94,19 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.LanguageService
             }
         }
 
-        protected override async Task UnregisterObjectBrowserLibraryManagerAsync(CancellationToken cancellationToken)
+        protected override void UnregisterObjectBrowserLibraryManager()
         {
-            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            Contract.ThrowIfFalse(JoinableTaskFactory.Context.IsOnMainThread);
 
             if (_libraryManagerCookie != 0)
             {
-                if (await GetServiceAsync(typeof(SVsObjectManager)).ConfigureAwait(true) is IVsObjectManager2 objectManager)
+                if (GetService(typeof(SVsObjectManager)) is IVsObjectManager2 objectManager)
                 {
                     objectManager.UnregisterLibrary(_libraryManagerCookie);
                     _libraryManagerCookie = 0;
                 }
 
-                _libraryManager.Dispose();
+                _libraryManager?.Dispose();
                 _libraryManager = null;
             }
         }
@@ -126,8 +123,7 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.LanguageService
         {
             if (name == "CSharp-Specific")
             {
-                var workspace = this.ComponentModel.GetService<VisualStudioWorkspace>();
-                return new Options.AutomationObject(workspace);
+                return new Options.AutomationObject(ComponentModel.GetService<ILegacyGlobalOptionService>());
             }
 
             return base.GetAutomationObject(name);
@@ -138,7 +134,7 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.LanguageService
             var editorFactory = new CSharpEditorFactory(this.ComponentModel);
             var codePageEditorFactory = new CSharpCodePageEditorFactory(editorFactory);
 
-            return new IVsEditorFactory[] { editorFactory, codePageEditorFactory };
+            return [editorFactory, codePageEditorFactory];
         }
 
         protected override CSharpLanguageService CreateLanguageService()

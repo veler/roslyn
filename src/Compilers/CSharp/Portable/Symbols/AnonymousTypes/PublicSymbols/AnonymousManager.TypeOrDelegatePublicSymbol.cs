@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
@@ -32,14 +33,16 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             internal abstract AnonymousTypeOrDelegatePublicSymbol SubstituteTypes(AbstractTypeMap typeMap);
 
             protected override NamedTypeSymbol WithTupleDataCore(TupleExtraData newData)
-                => throw ExceptionUtilities.Unreachable;
+                => throw ExceptionUtilities.Unreachable();
 
             internal sealed override IEnumerable<FieldSymbol> GetFieldsToEmit()
             {
-                throw ExceptionUtilities.Unreachable;
+                throw ExceptionUtilities.Unreachable();
             }
 
             internal sealed override bool HasCodeAnalysisEmbeddedAttribute => false;
+
+            internal sealed override bool HasCompilerLoweringPreserveAttribute => false;
 
             internal sealed override bool IsInterpolatedStringHandlerType => false;
 
@@ -72,6 +75,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 get { return false; }
             }
+
+            internal sealed override bool IsFileLocal => false;
+            internal sealed override FileIdentifier? AssociatedFileIdentifier => null;
 
             public sealed override int Arity
             {
@@ -130,12 +136,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return ImmutableArray<NamedTypeSymbol>.Empty;
             }
 
-            public sealed override ImmutableArray<NamedTypeSymbol> GetTypeMembers(string name)
+            public sealed override ImmutableArray<NamedTypeSymbol> GetTypeMembers(ReadOnlyMemory<char> name)
             {
                 return ImmutableArray<NamedTypeSymbol>.Empty;
             }
 
-            public sealed override ImmutableArray<NamedTypeSymbol> GetTypeMembers(string name, int arity)
+            public sealed override ImmutableArray<NamedTypeSymbol> GetTypeMembers(ReadOnlyMemory<char> name, int arity)
             {
                 return ImmutableArray<NamedTypeSymbol>.Empty;
             }
@@ -152,7 +158,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             internal sealed override ImmutableArray<NamedTypeSymbol> GetInterfacesToEmit()
             {
-                throw ExceptionUtilities.Unreachable;
+                throw ExceptionUtilities.Unreachable();
             }
 
             internal abstract override NamedTypeSymbol BaseTypeNoUseSiteDiagnostics { get; }
@@ -226,7 +232,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             public sealed override bool AreLocalsZeroed
             {
-                get { throw ExceptionUtilities.Unreachable; }
+                get { throw ExceptionUtilities.Unreachable(); }
             }
 
             internal sealed override bool HasDeclarativeSecurity
@@ -236,7 +242,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             internal sealed override IEnumerable<Microsoft.Cci.SecurityAttribute> GetSecurityInformation()
             {
-                throw ExceptionUtilities.Unreachable;
+                throw ExceptionUtilities.Unreachable();
             }
 
             internal sealed override ImmutableArray<string> GetAppliedConditionalSymbols()
@@ -259,7 +265,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return ImmutableArray<NamedTypeSymbol>.Empty;
             }
 
-            internal sealed override NamedTypeSymbol AsNativeInteger() => throw ExceptionUtilities.Unreachable;
+            internal sealed override NamedTypeSymbol AsNativeInteger() => throw ExceptionUtilities.Unreachable();
 
             internal sealed override NamedTypeSymbol? NativeIntegerUnderlyingType => null;
 
@@ -275,6 +281,31 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             internal sealed override IEnumerable<(MethodSymbol Body, MethodSymbol Implemented)> SynthesizedInterfaceMethodImpls()
             {
                 return SpecializedCollections.EmptyEnumerable<(MethodSymbol Body, MethodSymbol Implemented)>();
+            }
+
+            internal override bool GetGuidString(out string? guidString)
+            {
+                guidString = null;
+                return false;
+            }
+
+            internal sealed override bool HasInlineArrayAttribute(out int length)
+            {
+                length = 0;
+                return false;
+            }
+
+            internal sealed override bool HasCollectionBuilderAttribute(out TypeSymbol? builderType, out string? methodName)
+            {
+                builderType = null;
+                methodName = null;
+                return false;
+            }
+
+            internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol? builderArgument)
+            {
+                builderArgument = null;
+                return false;
             }
         }
     }

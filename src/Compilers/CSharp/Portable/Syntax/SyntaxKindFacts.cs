@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Microsoft.CodeAnalysis.CSharp
 {
@@ -17,6 +19,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
             for (int i = (int)SyntaxKind.BoolKeyword; i <= (int)SyntaxKind.ImplicitKeyword; i++)
             {
+                Debug.Assert(Enum.IsDefined(typeof(SyntaxKind), (SyntaxKind)i));
                 yield return (SyntaxKind)i;
             }
         }
@@ -45,6 +48,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 case SyntaxKind.AssemblyKeyword:
                 case SyntaxKind.ModuleKeyword:
+                case SyntaxKind.EventKeyword:
+                case SyntaxKind.FieldKeyword:
+                case SyntaxKind.MethodKeyword:
+                case SyntaxKind.ParamKeyword:
+                case SyntaxKind.PropertyKeyword:
+                case SyntaxKind.ReturnKeyword:
+                case SyntaxKind.TypeKeyword:
+                case SyntaxKind.TypeVarKeyword:
                     return true;
                 default:
                     return false;
@@ -134,9 +145,10 @@ namespace Microsoft.CodeAnalysis.CSharp
             yield return SyntaxKind.TrueKeyword;
             yield return SyntaxKind.FalseKeyword;
             yield return SyntaxKind.DefaultKeyword;
-            yield return SyntaxKind.HiddenKeyword;
+
             for (int i = (int)SyntaxKind.ElifKeyword; i <= (int)SyntaxKind.RestoreKeyword; i++)
             {
+                Debug.Assert(Enum.IsDefined(typeof(SyntaxKind), (SyntaxKind)i));
                 yield return (SyntaxKind)i;
             }
         }
@@ -164,10 +176,26 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public static IEnumerable<SyntaxKind> GetPunctuationKinds()
         {
-            for (int i = (int)SyntaxKind.TildeToken; i <= (int)SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken; i++)
+            for (int i = (int)SyntaxKind.TildeToken; i <= (int)SyntaxKind.DotDotToken; i++)
             {
+                Debug.Assert(Enum.IsDefined(typeof(SyntaxKind), (SyntaxKind)i));
                 yield return (SyntaxKind)i;
             }
+
+            for (int i = (int)SyntaxKind.SlashGreaterThanToken; i <= (int)SyntaxKind.XmlProcessingInstructionEndToken; i++)
+            {
+                Debug.Assert(Enum.IsDefined(typeof(SyntaxKind), (SyntaxKind)i));
+                yield return (SyntaxKind)i;
+            }
+
+            for (int i = (int)SyntaxKind.BarBarToken; i <= (int)SyntaxKind.QuestionQuestionEqualsToken; i++)
+            {
+                Debug.Assert(Enum.IsDefined(typeof(SyntaxKind), (SyntaxKind)i));
+                yield return (SyntaxKind)i;
+            }
+
+            yield return SyntaxKind.GreaterThanGreaterThanGreaterThanToken;
+            yield return SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken;
         }
 
         public static bool IsPunctuationOrKeyword(SyntaxKind kind)
@@ -181,11 +209,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 case SyntaxKind.IdentifierToken:
                 case SyntaxKind.StringLiteralToken:
-                case SyntaxKind.UTF8StringLiteralToken:
+                case SyntaxKind.Utf8StringLiteralToken:
                 case SyntaxKind.SingleLineRawStringLiteralToken:
-                case SyntaxKind.UTF8SingleLineRawStringLiteralToken:
+                case SyntaxKind.Utf8SingleLineRawStringLiteralToken:
                 case SyntaxKind.MultiLineRawStringLiteralToken:
-                case SyntaxKind.UTF8MultiLineRawStringLiteralToken:
+                case SyntaxKind.Utf8MultiLineRawStringLiteralToken:
                 case SyntaxKind.CharacterLiteralToken:
                 case SyntaxKind.NumericLiteralToken:
                 case SyntaxKind.XmlTextLiteralToken:
@@ -543,11 +571,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             return token switch
             {
                 SyntaxKind.StringLiteralToken => SyntaxKind.StringLiteralExpression,
-                SyntaxKind.UTF8StringLiteralToken => SyntaxKind.UTF8StringLiteralExpression,
+                SyntaxKind.Utf8StringLiteralToken => SyntaxKind.Utf8StringLiteralExpression,
                 SyntaxKind.SingleLineRawStringLiteralToken => SyntaxKind.StringLiteralExpression,
-                SyntaxKind.UTF8SingleLineRawStringLiteralToken => SyntaxKind.UTF8StringLiteralExpression,
+                SyntaxKind.Utf8SingleLineRawStringLiteralToken => SyntaxKind.Utf8StringLiteralExpression,
                 SyntaxKind.MultiLineRawStringLiteralToken => SyntaxKind.StringLiteralExpression,
-                SyntaxKind.UTF8MultiLineRawStringLiteralToken => SyntaxKind.UTF8StringLiteralExpression,
+                SyntaxKind.Utf8MultiLineRawStringLiteralToken => SyntaxKind.Utf8StringLiteralExpression,
                 SyntaxKind.CharacterLiteralToken => SyntaxKind.CharacterLiteralExpression,
                 SyntaxKind.NumericLiteralToken => SyntaxKind.NumericLiteralExpression,
                 SyntaxKind.NullKeyword => SyntaxKind.NullLiteralExpression,
@@ -1138,9 +1166,14 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public static IEnumerable<SyntaxKind> GetContextualKeywordKinds()
         {
-            for (int i = (int)SyntaxKind.YieldKeyword; i <= (int)SyntaxKind.RequiredKeyword; i++)
+            for (int i = (int)SyntaxKind.YieldKeyword; i <= (int)SyntaxKind.AllowsKeyword; i++)
             {
-                yield return (SyntaxKind)i;
+                // 8441 corresponds to a deleted kind (DataKeyword) that was previously shipped.
+                if (i != 8441)
+                {
+                    Debug.Assert(Enum.IsDefined(typeof(SyntaxKind), (SyntaxKind)i));
+                    yield return (SyntaxKind)i;
+                }
             }
         }
 
@@ -1192,6 +1225,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case SyntaxKind.ManagedKeyword:
                 case SyntaxKind.UnmanagedKeyword:
                 case SyntaxKind.RequiredKeyword:
+                case SyntaxKind.ScopedKeyword:
+                case SyntaxKind.FileKeyword:
+                case SyntaxKind.AllowsKeyword:
                     return true;
                 default:
                     return false;
@@ -1313,6 +1349,12 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return SyntaxKind.UnmanagedKeyword;
                 case "required":
                     return SyntaxKind.RequiredKeyword;
+                case "scoped":
+                    return SyntaxKind.ScopedKeyword;
+                case "file":
+                    return SyntaxKind.FileKeyword;
+                case "allows":
+                    return SyntaxKind.AllowsKeyword;
                 default:
                     return SyntaxKind.None;
             }
@@ -1754,6 +1796,12 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return "unmanaged";
                 case SyntaxKind.RequiredKeyword:
                     return "required";
+                case SyntaxKind.ScopedKeyword:
+                    return "scoped";
+                case SyntaxKind.FileKeyword:
+                    return "file";
+                case SyntaxKind.AllowsKeyword:
+                    return "allows";
                 default:
                     return string.Empty;
             }

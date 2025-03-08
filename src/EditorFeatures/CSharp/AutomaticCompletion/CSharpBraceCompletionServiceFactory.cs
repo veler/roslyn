@@ -9,17 +9,11 @@ using Microsoft.CodeAnalysis.AutomaticCompletion;
 using Microsoft.CodeAnalysis.BraceCompletion;
 using Microsoft.CodeAnalysis.Host.Mef;
 
-namespace Microsoft.CodeAnalysis.Editor.CSharp.AutomaticCompletion
-{
-    [ExportLanguageService(typeof(IBraceCompletionServiceFactory), LanguageNames.CSharp), Shared]
-    internal class CSharpBraceCompletionServiceFactory : AbstractBraceCompletionServiceFactory
-    {
-        [ImportingConstructor]
-        [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
-        public CSharpBraceCompletionServiceFactory(
-            [ImportMany(LanguageNames.CSharp)] IEnumerable<IBraceCompletionService> braceCompletionServices)
-            : base(braceCompletionServices)
-        {
-        }
-    }
-}
+namespace Microsoft.CodeAnalysis.Editor.CSharp.AutomaticCompletion;
+
+[ExportLanguageService(typeof(IBraceCompletionServiceFactory), LanguageNames.CSharp), Shared]
+[method: ImportingConstructor]
+[method: Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
+internal sealed class CSharpBraceCompletionServiceFactory(
+    [ImportMany] IEnumerable<Lazy<IBraceCompletionService, LanguageMetadata>> braceCompletionServices)
+    : AbstractBraceCompletionServiceFactory(braceCompletionServices, LanguageNames.CSharp);

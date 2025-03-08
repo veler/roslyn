@@ -9,12 +9,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis.Editor.UnitTests.Utilities;
-using Microsoft.CodeAnalysis.Editor.UnitTests.Workspaces;
-using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Shared.TestHooks;
 using Microsoft.CodeAnalysis.Test.Utilities;
 using Microsoft.VisualStudio.Commanding;
-using Microsoft.VisualStudio.Composition;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Editor.Commanding.Commands;
@@ -28,7 +25,7 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests
 {
     internal abstract class AbstractCommandHandlerTestState : IDisposable
     {
-        public readonly TestWorkspace Workspace;
+        public readonly EditorTestWorkspace Workspace;
         public readonly IEditorOperations EditorOperations;
         public readonly ITextUndoHistoryRegistry UndoHistoryRegistry;
         private readonly ITextView _textView;
@@ -62,7 +59,7 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests
             bool makeSeparateBufferForCursor = false,
             ImmutableArray<string> roles = default)
         {
-            Workspace = TestWorkspace.CreateWorkspace(
+            Workspace = EditorTestWorkspace.CreateWorkspace(
                 workspaceElement,
                 composition: composition,
                 workspaceKind: workspaceKind);
@@ -124,6 +121,8 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests
 
             this.EditorOperations = GetService<IEditorOperationsFactoryService>().GetEditorOperations(_textView);
             this.UndoHistoryRegistry = GetService<ITextUndoHistoryRegistry>();
+
+            _textView.Options.GlobalOptions.SetOptionValue(DefaultOptions.IndentStyleId, IndentingStyle.Smart);
         }
 
         public void Dispose()
@@ -213,8 +212,8 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests
             var lineCaretPosition = bufferCaretPosition - line.Start.Position;
 
             var text = line.GetText();
-            var textBeforeCaret = text.Substring(0, lineCaretPosition);
-            var textAfterCaret = text.Substring(lineCaretPosition, text.Length - lineCaretPosition);
+            var textBeforeCaret = text[..lineCaretPosition];
+            var textAfterCaret = text[lineCaretPosition..];
 
             return (textBeforeCaret, textAfterCaret);
         }
@@ -226,7 +225,7 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests
             => TextView.Caret.Position;
 
         /// <summary>
-        /// Used in synchronous methods to ensure all outstanding <see cref="IAsyncToken"/> work has been
+        /// Used in synchronous methods to ensure all outstanding work has been
         /// completed.
         /// </summary>
         public void AssertNoAsynchronousOperationsRunning()

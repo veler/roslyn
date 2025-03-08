@@ -11,6 +11,12 @@ parameters:
   - name: insertToolset
     type: string
     default: ''
+  - name: queueSpeedometerValidation
+    type: string
+    default: 'true'
+  - name: retainInsertedBuild
+    type: string
+    default: 'true'
 
   - name: buildUserName
     type: string
@@ -46,7 +52,7 @@ parameters:
 
 steps:
   - checkout: none
-
+  
   - task: NuGetCommand@2
     displayName: 'Install RIT from Azure Artifacts'
     inputs:
@@ -68,7 +74,7 @@ steps:
       Write-Host "##vso[task.setvariable variable=Template.CreateDraftPR]$($true)"
       Write-Host "##vso[task.setvariable variable=Template.AutoComplete]$($false)"
       Write-Host "##vso[task.setvariable variable=Template.TitlePrefix]$('')"
-      Write-Host "##vso[task.setvariable variable=Template.TitleSuffix]$('[Skip-SymbolCheck]')"
+      Write-Host "##vso[task.setvariable variable=Template.TitleSuffix]$('')"
       Write-Host "##vso[task.setvariable variable=Template.InsertToolset]$($true)"
       Write-Host "##vso[task.setvariable variable=Template.ComponentAzdoUri]$('')"
       Write-Host "##vso[task.setvariable variable=Template.ComponentProjectName]$('')"
@@ -174,7 +180,7 @@ steps:
   # Now that everything is set, actually perform the insertion.
   - powershell: |
       mv RoslynTools.VisualStudioInsertionTool.* RIT
-      .\RIT\tools\net46\OneOffInsertion.ps1 `
+      .\RIT\tools\net472\OneOffInsertion.ps1 `
         -autoComplete "$(Template.AutoComplete)" `
         -buildQueueName "$(Build.DefinitionName)" `
         -cherryPick "(default)" `
@@ -203,7 +209,9 @@ steps:
         -updateAssemblyVersions "(default)" `
         -updateCoreXTLibraries "(default)" `
         -visualStudioBranchName "$(Template.VSBranchName)" `
-        -writePullRequest "prid.txt"
+        -writePullRequest "prid.txt" `
+        -queueSpeedometerValidation "${{ parameters.queueSpeedometerValidation }}" `
+        -retaininsertedbuild "${{ parameters.retainInsertedBuild }}" 
     displayName: 'Run OneOffInsertion.ps1'
 
   - script: 'echo. && echo. && type "prid.txt" && echo. && echo.'

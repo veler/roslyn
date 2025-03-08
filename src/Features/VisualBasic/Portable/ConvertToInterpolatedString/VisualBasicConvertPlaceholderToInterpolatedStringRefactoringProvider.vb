@@ -10,17 +10,23 @@ Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 
 Namespace Microsoft.CodeAnalysis.VisualBasic.ConvertToInterpolatedString
     <ExportCodeRefactoringProvider(LanguageNames.VisualBasic, Name:=PredefinedCodeRefactoringProviderNames.ConvertPlaceholderToInterpolatedString), [Shared]>
-    Partial Friend Class VisualBasicConvertPlaceholderToInterpolatedStringRefactoringProvider
+    Partial Friend NotInheritable Class VisualBasicConvertPlaceholderToInterpolatedStringRefactoringProvider
         Inherits AbstractConvertPlaceholderToInterpolatedStringRefactoringProvider(Of
-            InvocationExpressionSyntax, ExpressionSyntax, ArgumentSyntax, LiteralExpressionSyntax, ArgumentListSyntax, InterpolationSyntax)
+            ExpressionSyntax,
+            LiteralExpressionSyntax,
+            InvocationExpressionSyntax,
+            InterpolatedStringExpressionSyntax,
+            ArgumentSyntax,
+            ArgumentListSyntax,
+            InterpolationSyntax)
 
         <ImportingConstructor>
         <SuppressMessage("RoslynDiagnosticsReliability", "RS0033:Importing constructor should be [Obsolete]", Justification:="Used in test code: https://github.com/dotnet/roslyn/issues/42814")>
         Public Sub New()
         End Sub
 
-        Protected Overrides Function GetInterpolatedString(text As String) As SyntaxNode
-            Return TryCast(SyntaxFactory.ParseExpression("$" + text), InterpolatedStringExpressionSyntax)
+        Protected Overrides Function ParseExpression(text As String) As ExpressionSyntax
+            Return SyntaxFactory.ParseExpression(text)
         End Function
     End Class
 End Namespace

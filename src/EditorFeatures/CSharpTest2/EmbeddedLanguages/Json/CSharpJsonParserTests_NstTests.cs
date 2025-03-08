@@ -16,7 +16,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.EmbeddedLanguages.Json
         {
             var (_, tree, allChars) = JustParseTree(stringText, JsonOptions.Strict, conversionFailureOk: false);
             Assert.NotNull(tree);
-            Roslyn.Utilities.Contract.ThrowIfNull(tree);
+            Contract.ThrowIfNull(tree);
             var actualTree = TreeToText(tree!).Replace("\"", "\"\"");
             Assert.Equal(expected.Replace("\"", "\"\""), actualTree);
 
@@ -752,7 +752,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.EmbeddedLanguages.Json
         }
 
         [Fact]
-        public void i_string_UTF8_surrogate_U_D800_json()
+        public void i_string_Utf8_surrogate_U_D800_json()
         {
             TestNST(@"@""[""""��""""]""", @"<Tree>
   <CompilationUnit>
@@ -4819,7 +4819,7 @@ line""</StringToken>
         }
 
         [Fact]
-        public void n_structure_incomplete_UTF8_BOM_json()
+        public void n_structure_incomplete_Utf8_BOM_json()
         {
             TestNST(@"@""�{}""", @"<Tree>
   <CompilationUnit>

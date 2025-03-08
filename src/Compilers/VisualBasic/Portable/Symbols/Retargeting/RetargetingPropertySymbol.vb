@@ -7,6 +7,7 @@ Imports System.Globalization
 Imports System.Threading
 Imports Microsoft.CodeAnalysis.PooledObjects
 Imports Microsoft.CodeAnalysis.Text
+Imports Microsoft.CodeAnalysis.VisualBasic.Emit
 Imports Microsoft.CodeAnalysis.VisualBasic.Symbols
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols.Retargeting
@@ -95,8 +96,8 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols.Retargeting
             Return RetargetingTranslator.GetRetargetedAttributes(_underlyingProperty, _lazyCustomAttributes)
         End Function
 
-        Friend Overrides Function GetCustomAttributesToEmit(compilationState As ModuleCompilationState) As IEnumerable(Of VisualBasicAttributeData)
-            Return RetargetingTranslator.RetargetAttributes(_underlyingProperty.GetCustomAttributesToEmit(compilationState))
+        Friend Overrides Function GetCustomAttributesToEmit(moduleBuilder As PEModuleBuilder) As IEnumerable(Of VisualBasicAttributeData)
+            Return RetargetingTranslator.RetargetAttributes(_underlyingProperty.GetCustomAttributesToEmit(moduleBuilder))
         End Function
 
         Public Overrides ReadOnly Property GetMethod As MethodSymbol
@@ -152,6 +153,10 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols.Retargeting
                 Return _underlyingProperty.IsOverloads
             End Get
         End Property
+
+        Public Overrides Function GetOverloadResolutionPriority() As Integer
+            Return _underlyingProperty.GetOverloadResolutionPriority()
+        End Function
 
         Public Overrides ReadOnly Property IsShared As Boolean
             Get
@@ -328,5 +333,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols.Retargeting
         Public Overrides Function GetDocumentationCommentXml(Optional preferredCulture As CultureInfo = Nothing, Optional expandIncludes As Boolean = False, Optional cancellationToken As CancellationToken = Nothing) As String
             Return _underlyingProperty.GetDocumentationCommentXml(preferredCulture, expandIncludes, cancellationToken)
         End Function
+
+        Public Overrides ReadOnly Property IsRequired As Boolean
+            Get
+                Debug.Assert(Not _underlyingProperty.IsRequired)
+                Return False
+            End Get
+        End Property
     End Class
 End Namespace

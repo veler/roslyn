@@ -5,124 +5,169 @@
 using System;
 using System.Collections.Immutable;
 using System.ComponentModel;
-using Microsoft.CodeAnalysis.LanguageServices;
+using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.LanguageService;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.LanguageServices.Implementation.Utilities;
 
-namespace Microsoft.VisualStudio.LanguageServices.Implementation.MoveStaticMembers
+namespace Microsoft.VisualStudio.LanguageServices.Implementation.MoveStaticMembers;
+
+internal class MoveStaticMembersDialogViewModel : AbstractNotifyPropertyChanged
 {
-    internal class MoveStaticMembersDialogViewModel : AbstractNotifyPropertyChanged
+    public StaticMemberSelectionViewModel MemberSelectionViewModel { get; }
+
+    private readonly ISyntaxFacts _syntaxFacts;
+    private readonly string _prependedNamespace;
+
+    public MoveStaticMembersDialogViewModel(
+        StaticMemberSelectionViewModel memberSelectionViewModel,
+        string defaultType,
+        ImmutableArray<TypeNameItem> availableTypes,
+        string prependedNamespace,
+        ISyntaxFacts syntaxFacts)
     {
-        public StaticMemberSelectionViewModel MemberSelectionViewModel { get; }
+        MemberSelectionViewModel = memberSelectionViewModel;
+        _syntaxFacts = syntaxFacts ?? throw new ArgumentNullException(nameof(syntaxFacts));
+        _searchText = defaultType;
+        _prependedNamespace = string.IsNullOrEmpty(prependedNamespace) ? prependedNamespace : prependedNamespace + ".";
 
-        private readonly ISyntaxFacts _syntaxFacts;
+        _destinationName = new TypeNameItem(_prependedNamespace + defaultType);
+        AvailableTypes = availableTypes;
 
-        private readonly ImmutableArray<string> _existingNames;
+        PropertyChanged += MoveMembersToTypeDialogViewModel_PropertyChanged;
+        OnDestinationUpdated();
+    }
 
-        public MoveStaticMembersDialogViewModel(
-            StaticMemberSelectionViewModel memberSelectionViewModel,
-            string defaultType,
-            ImmutableArray<string> existingNames,
-            string prependedNamespace,
-            ISyntaxFacts syntaxFacts)
+    public string TypeName_NamespaceOnly
+    {
+        get
         {
-            MemberSelectionViewModel = memberSelectionViewModel;
-            _syntaxFacts = syntaxFacts ?? throw new ArgumentNullException(nameof(syntaxFacts));
-            _destinationName = defaultType;
-            _existingNames = existingNames;
-            PrependedNamespace = string.IsNullOrEmpty(prependedNamespace) ? prependedNamespace : prependedNamespace + ".";
+            var lastDot = _destinationName.FullyQualifiedTypeName.LastIndexOf('.');
+            return lastDot >= 0 ? _destinationName.FullyQualifiedTypeName[0..(lastDot + 1)] : "";
+        }
+    }
 
-            PropertyChanged += MoveMembersToTypeDialogViewModel_PropertyChanged;
-            OnDestinationUpdated();
+    public string TypeName_NameOnly
+    {
+        get
+        {
+            var lastDot = _destinationName.FullyQualifiedTypeName.LastIndexOf('.');
+            return lastDot >= 0 ? _destinationName.FullyQualifiedTypeName[(lastDot + 1)..] : _destinationName.FullyQualifiedTypeName;
+        }
+    }
+
+    private void MoveMembersToTypeDialogViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(DestinationName):
+                OnDestinationUpdated();
+                break;
+
+            case nameof(SearchText):
+                OnSearchTextUpdated();
+                break;
+        }
+    }
+
+    private void OnSearchTextUpdated()
+    {
+        var foundItem = AvailableTypes.FirstOrDefault(t => t.FullyQualifiedTypeName == SearchText);
+        if (foundItem is null)
+        {
+            DestinationName = new(_prependedNamespace + SearchText);
+        }
+        else
+        {
+            DestinationName = foundItem;
         }
 
-        private void MoveMembersToTypeDialogViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        NotifyPropertyChanged(nameof(TypeName_NameOnly));
+        NotifyPropertyChanged(nameof(TypeName_NamespaceOnly));
+    }
+
+    public void OnDestinationUpdated()
+    {
+        if (!_destinationName.IsNew)
         {
-            switch (e.PropertyName)
-            {
-                case nameof(DestinationName):
-                    OnDestinationUpdated();
-                    break;
-            }
+            CanSubmit = true;
+            ShowMessage = false;
+            return;
         }
 
-        public void OnDestinationUpdated()
-        {
-            // TODO change once we allow movement to existing types
-            var fullyQualifiedTypeName = PrependedNamespace + DestinationName;
-            var isNewType = !_existingNames.Contains(fullyQualifiedTypeName);
-            CanSubmit = isNewType && IsValidType(fullyQualifiedTypeName);
+        CanSubmit = IsValidType(_destinationName.FullyQualifiedTypeName);
 
-            if (CanSubmit)
-            {
-                Icon = KnownMonikers.StatusInformation;
-                Message = ServicesVSResources.New_Type_Name_colon;
-                ShowMessage = true;
-            }
-            else
-            {
-                Icon = KnownMonikers.StatusInvalid;
-                Message = ServicesVSResources.Invalid_type_name;
-                ShowMessage = true;
-            }
+        if (CanSubmit)
+        {
+            Icon = KnownMonikers.StatusInformation;
+            Message = ServicesVSResources.New_Type_Name_colon;
+            ShowMessage = true;
         }
-
-        private bool IsValidType(string typeName)
+        else
         {
-            if (string.IsNullOrEmpty(typeName))
-            {
+            Icon = KnownMonikers.StatusInvalid;
+            Message = ServicesVSResources.Invalid_type_name;
+            ShowMessage = true;
+        }
+    }
+
+    private bool IsValidType(string typeName)
+    {
+        if (string.IsNullOrEmpty(typeName))
+            return false;
+
+        foreach (var identifier in typeName.Split('.'))
+        {
+            if (!_syntaxFacts.IsValidIdentifier(identifier))
                 return false;
-            }
-
-            foreach (var identifier in typeName.Split('.'))
-            {
-                if (_syntaxFacts.IsValidIdentifier(identifier))
-                {
-                    continue;
-                }
-
-                return false;
-            }
-
-            return true;
         }
 
-        public string PrependedNamespace { get; }
+        return true;
+    }
 
-        private string _destinationName;
-        public string DestinationName
-        {
-            get => _destinationName;
-            set => SetProperty(ref _destinationName, value);
-        }
+    public ImmutableArray<TypeNameItem> AvailableTypes { get; }
 
-        private ImageMoniker _icon;
-        public ImageMoniker Icon
-        {
-            get => _icon;
-            private set => SetProperty(ref _icon, value);
-        }
+    private TypeNameItem _destinationName;
+    public TypeNameItem DestinationName
+    {
+        get => _destinationName;
+        private set => SetProperty(ref _destinationName, value);
+    }
 
-        private string? _message;
-        public string? Message
-        {
-            get => _message;
-            private set => SetProperty(ref _message, value);
-        }
+    private ImageMoniker _icon;
+    public ImageMoniker Icon
+    {
+        get => _icon;
+        private set => SetProperty(ref _icon, value);
+    }
 
-        private bool _showMessage = false;
-        public bool ShowMessage
-        {
-            get => _showMessage;
-            private set => SetProperty(ref _showMessage, value);
-        }
+    private string? _message;
+    public string? Message
+    {
+        get => _message;
+        private set => SetProperty(ref _message, value);
+    }
 
-        private bool _canSubmit = true;
-        public bool CanSubmit
-        {
-            get => _canSubmit;
-            set => SetProperty(ref _canSubmit, value);
-        }
+    private bool _showMessage = false;
+    public bool ShowMessage
+    {
+        get => _showMessage;
+        private set => SetProperty(ref _showMessage, value);
+    }
+
+    private bool _canSubmit = true;
+    public bool CanSubmit
+    {
+        get => _canSubmit;
+        set => SetProperty(ref _canSubmit, value);
+    }
+
+    private string _searchText;
+    public string SearchText
+    {
+        get => _searchText;
+        set => SetProperty(ref _searchText, value);
     }
 }

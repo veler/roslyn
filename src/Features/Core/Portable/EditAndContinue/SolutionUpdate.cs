@@ -4,47 +4,68 @@
 
 using System;
 using System.Collections.Immutable;
-using Microsoft.CodeAnalysis.Emit;
-using Microsoft.CodeAnalysis.EditAndContinue.Contracts;
+using System.Linq;
+using Microsoft.CodeAnalysis.Contracts.EditAndContinue;
 
-namespace Microsoft.CodeAnalysis.EditAndContinue
+namespace Microsoft.CodeAnalysis.EditAndContinue;
+
+internal readonly struct SolutionUpdate(
+    ModuleUpdates moduleUpdates,
+    ImmutableArray<(Guid ModuleId, ImmutableArray<(ManagedModuleMethodId Method, NonRemappableRegion Region)>)> nonRemappableRegions,
+    ImmutableArray<ProjectBaseline> projectBaselines,
+    ImmutableArray<ProjectDiagnostics> diagnostics,
+    ImmutableArray<(DocumentId DocumentId, ImmutableArray<RudeEditDiagnostic> Diagnostics)> documentsWithRudeEdits,
+    Diagnostic? syntaxError)
 {
-    internal readonly struct SolutionUpdate
-    {
-        public readonly ManagedModuleUpdates ModuleUpdates;
-        public readonly ImmutableArray<(Guid ModuleId, ImmutableArray<(ManagedModuleMethodId Method, NonRemappableRegion Region)>)> NonRemappableRegions;
-        public readonly ImmutableArray<(ProjectId ProjectId, EmitBaseline Baseline)> EmitBaselines;
-        public readonly ImmutableArray<(ProjectId ProjectId, ImmutableArray<Diagnostic> Diagnostics)> Diagnostics;
-        public readonly ImmutableArray<(DocumentId DocumentId, ImmutableArray<RudeEditDiagnostic> Diagnostics)> DocumentsWithRudeEdits;
-        public readonly Diagnostic? SyntaxError;
+    public readonly ModuleUpdates ModuleUpdates = moduleUpdates;
+    public readonly ImmutableArray<(Guid ModuleId, ImmutableArray<(ManagedModuleMethodId Method, NonRemappableRegion Region)>)> NonRemappableRegions = nonRemappableRegions;
+    public readonly ImmutableArray<ProjectBaseline> ProjectBaselines = projectBaselines;
+    public readonly ImmutableArray<ProjectDiagnostics> Diagnostics = diagnostics;
+    public readonly ImmutableArray<(DocumentId DocumentId, ImmutableArray<RudeEditDiagnostic> Diagnostics)> DocumentsWithRudeEdits = documentsWithRudeEdits;
+    public readonly Diagnostic? SyntaxError = syntaxError;
 
-        public SolutionUpdate(
-            ManagedModuleUpdates moduleUpdates,
-            ImmutableArray<(Guid ModuleId, ImmutableArray<(ManagedModuleMethodId Method, NonRemappableRegion Region)>)> nonRemappableRegions,
-            ImmutableArray<(ProjectId ProjectId, EmitBaseline Baseline)> emitBaselines,
-            ImmutableArray<(ProjectId ProjectId, ImmutableArray<Diagnostic> Diagnostics)> diagnostics,
-            ImmutableArray<(DocumentId DocumentId, ImmutableArray<RudeEditDiagnostic> Diagnostics)> documentsWithRudeEdits,
-            Diagnostic? syntaxError)
+    public static SolutionUpdate Blocked(
+        ImmutableArray<ProjectDiagnostics> diagnostics,
+        ImmutableArray<(DocumentId, ImmutableArray<RudeEditDiagnostic>)> documentsWithRudeEdits,
+        Diagnostic? syntaxError,
+        bool hasEmitErrors)
+        => new(
+            new(syntaxError != null || hasEmitErrors ? ModuleUpdateStatus.Blocked : ModuleUpdateStatus.RestartRequired, []),
+            nonRemappableRegions: [],
+            projectBaselines: [],
+            diagnostics,
+            documentsWithRudeEdits,
+            syntaxError);
+
+    internal void Log(TraceLog log, UpdateId updateId)
+    {
+        log.Write($"Solution update {updateId} status: {ModuleUpdates.Status}");
+
+        foreach (var moduleUpdate in ModuleUpdates.Updates)
         {
-            ModuleUpdates = moduleUpdates;
-            NonRemappableRegions = nonRemappableRegions;
-            EmitBaselines = emitBaselines;
-            Diagnostics = diagnostics;
-            DocumentsWithRudeEdits = documentsWithRudeEdits;
-            SyntaxError = syntaxError;
+            log.Write("Module update: " +
+                $"capabilities=[{string.Join(",", moduleUpdate.RequiredCapabilities)}], " +
+                $"types=[{string.Join(",", moduleUpdate.UpdatedTypes.Select(token => token.ToString("X8")))}], " +
+                $"methods=[{string.Join(",", moduleUpdate.UpdatedMethods.Select(token => token.ToString("X8")))}]");
         }
 
-        public static SolutionUpdate Blocked(
-            ImmutableArray<(ProjectId, ImmutableArray<Diagnostic>)> diagnostics,
-            ImmutableArray<(DocumentId, ImmutableArray<RudeEditDiagnostic>)> documentsWithRudeEdits,
-            Diagnostic? syntaxError,
-            bool hasEmitErrors)
-            => new(
-                new(syntaxError != null || hasEmitErrors ? ManagedModuleUpdateStatus.Blocked : ManagedModuleUpdateStatus.RestartRequired, ImmutableArray<ManagedModuleUpdate>.Empty),
-                ImmutableArray<(Guid, ImmutableArray<(ManagedModuleMethodId, NonRemappableRegion)>)>.Empty,
-                ImmutableArray<(ProjectId, EmitBaseline)>.Empty,
-                diagnostics,
-                documentsWithRudeEdits,
-                syntaxError);
+        foreach (var projectDiagnostics in Diagnostics)
+        {
+            foreach (var diagnostic in projectDiagnostics.Diagnostics)
+            {
+                if (diagnostic.Severity == DiagnosticSeverity.Error)
+                {
+                    log.Write($"Project {projectDiagnostics.ProjectId.DebugName} update error: {diagnostic}", LogMessageSeverity.Error);
+                }
+            }
+        }
+
+        foreach (var documentWithRudeEdits in DocumentsWithRudeEdits)
+        {
+            foreach (var rudeEdit in documentWithRudeEdits.Diagnostics)
+            {
+                log.Write($"Document {documentWithRudeEdits.DocumentId.DebugName} rude edit: {rudeEdit.Kind} {rudeEdit.SyntaxKind}", LogMessageSeverity.Error);
+            }
+        }
     }
 }

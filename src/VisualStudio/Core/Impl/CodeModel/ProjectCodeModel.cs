@@ -8,9 +8,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Editor.Shared.Utilities;
-using Microsoft.CodeAnalysis.Options;
 using Microsoft.VisualStudio.LanguageServices.Implementation.Interop;
-using Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem;
 using Roslyn.Utilities;
 
 namespace Microsoft.VisualStudio.LanguageServices.Implementation.CodeModel
@@ -65,7 +63,7 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.CodeModel
 
                     if (workspaceProject != null)
                     {
-                        _codeModelCache = new CodeModelProjectCache(_threadingContext, _projectId, _codeModelInstanceFactory, _projectCodeModelFactory, _serviceProvider, workspaceProject.LanguageServices, _visualStudioWorkspace);
+                        _codeModelCache = new CodeModelProjectCache(_threadingContext, _projectId, _codeModelInstanceFactory, _projectCodeModelFactory, _serviceProvider, workspaceProject.Services, _visualStudioWorkspace);
                     }
                 }
 

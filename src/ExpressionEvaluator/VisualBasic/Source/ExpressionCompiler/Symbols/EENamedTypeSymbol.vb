@@ -336,6 +336,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
             End Get
         End Property
 
+        Friend Overrides ReadOnly Property HasCompilerLoweringPreserveAttribute As Boolean
+            Get
+                Return False
+            End Get
+        End Property
+
         Friend Overrides ReadOnly Property IsExtensibleInterfaceNoUseSiteDiagnostics As Boolean
             Get
                 Return False
@@ -345,6 +351,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
         Friend Overrides ReadOnly Property TypeSubstitution As TypeSubstitution
             Get
                 Return Nothing
+            End Get
+        End Property
+
+        Friend Overrides ReadOnly Property HasAnyDeclaredRequiredMembers As Boolean
+            Get
+                Return False
             End Get
         End Property
 
@@ -364,6 +376,11 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator
                 Debug.Assert(typeParameter.Ordinal = i)
             Next
         End Sub
+
+        Friend Overrides Function GetGuidString(ByRef guidString As String) As Boolean
+            guidString = Nothing
+            Return False
+        End Function
 
         Friend Overrides Function GetSynthesizedWithEventsOverrides() As IEnumerable(Of PropertySymbol)
             Return SpecializedCollections.EmptyEnumerable(Of PropertySymbol)()

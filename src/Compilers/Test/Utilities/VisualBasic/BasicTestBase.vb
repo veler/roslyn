@@ -12,6 +12,18 @@ Imports Xunit
 Public MustInherit Class BasicTestBase
     Inherits CommonTestBase
 
+    Public Const CompilerLoweringPreserveAttributeDefinition As String = "
+Namespace System.Runtime.CompilerServices
+    <AttributeUsage(AttributeTargets.Class, Inherited:= false)>
+    Public Class CompilerLoweringPreserveAttribute
+        Inherits Attribute
+        
+        Sub New()
+        End Sub
+    End Class
+End Namespace
+"
+
     Public Function XCDataToString(Optional data As XCData = Nothing) As String
         Return data?.Value.Replace(vbLf, Environment.NewLine)
     End Function
@@ -39,7 +51,7 @@ Public MustInherit Class BasicTestBase
         Optional options As VisualBasicCompilationOptions = Nothing,
         Optional parseOptions As VisualBasicParseOptions = Nothing,
         Optional emitOptions As EmitOptions = Nothing,
-        Optional verify As Verification = Verification.Passes
+        Optional verify As Verification = Nothing
     ) As CompilationVerifier
 
         Return CompileAndVerify(
@@ -73,7 +85,7 @@ Public MustInherit Class BasicTestBase
         Optional expectedReturnCode As Integer? = Nothing,
         Optional args As String() = Nothing,
         Optional emitOptions As EmitOptions = Nothing,
-        Optional verify As Verification = Verification.Passes) As CompilationVerifier
+        Optional verify As Verification = Nothing) As CompilationVerifier
 
         Return MyBase.CompileAndVerifyCommon(
             compilation,
@@ -103,7 +115,7 @@ Public MustInherit Class BasicTestBase
         Optional symbolValidator As Action(Of ModuleSymbol) = Nothing,
         Optional expectedSignatures As SignatureDescription() = Nothing,
         Optional emitOptions As EmitOptions = Nothing,
-        Optional verify As Verification = Verification.Passes) As CompilationVerifier
+        Optional verify As Verification = Nothing) As CompilationVerifier
 
         Return CompileAndVerify(
             compilation,
@@ -136,7 +148,7 @@ Public MustInherit Class BasicTestBase
         Optional options As VisualBasicCompilationOptions = Nothing,
         Optional parseOptions As VisualBasicParseOptions = Nothing,
         Optional emitOptions As EmitOptions = Nothing,
-        Optional verify As Verification = Verification.Passes,
+        Optional verify As Verification = Nothing,
         Optional useLatestFramework As Boolean = False
     ) As CompilationVerifier
 
@@ -176,7 +188,7 @@ Public MustInherit Class BasicTestBase
         Optional options As VisualBasicCompilationOptions = Nothing,
         Optional parseOptions As VisualBasicParseOptions = Nothing,
         Optional emitOptions As EmitOptions = Nothing,
-        Optional verify As Verification = Verification.Passes
+        Optional verify As Verification = Nothing
     ) As CompilationVerifier
 
         If options Is Nothing Then
@@ -217,7 +229,7 @@ Public MustInherit Class BasicTestBase
         Optional expectedSignatures As SignatureDescription() = Nothing,
         Optional options As VisualBasicCompilationOptions = Nothing,
         Optional parseOptions As VisualBasicParseOptions = Nothing,
-        Optional verify As Verification = Verification.Passes
+        Optional verify As Verification = Nothing
     ) As CompilationVerifier
         Return Me.CompileAndVerify(
             source,
@@ -250,7 +262,7 @@ Public MustInherit Class BasicTestBase
         Optional expectedSignatures As SignatureDescription() = Nothing,
         Optional options As VisualBasicCompilationOptions = Nothing,
         Optional parseOptions As VisualBasicParseOptions = Nothing,
-        Optional verify As Verification = Verification.Passes
+        Optional verify As Verification = Nothing
     ) As CompilationVerifier
         Return CompileAndVerifyOnWin8Only(
             source,
@@ -280,7 +292,7 @@ Public MustInherit Class BasicTestBase
         Optional expectedSignatures As SignatureDescription() = Nothing,
         Optional options As VisualBasicCompilationOptions = Nothing,
         Optional parseOptions As VisualBasicParseOptions = Nothing,
-        Optional verify As Verification = Verification.Passes,
+        Optional verify As Verification = Nothing,
         Optional useLatestFramework As Boolean = False
     ) As CompilationVerifier
         Return CompileAndVerify(
@@ -314,7 +326,7 @@ Public MustInherit Class BasicTestBase
         Optional parseOptions As VisualBasicParseOptions = Nothing,
         Optional emitOptions As EmitOptions = Nothing,
         Optional assemblyName As String = Nothing,
-        Optional verify As Verification = Verification.Passes,
+        Optional verify As Verification = Nothing,
         Optional targetFramework As TargetFramework = TargetFramework.StandardAndVBRuntime
     ) As CompilationVerifier
 
@@ -385,7 +397,6 @@ Public MustInherit Class BasicTestBase
         If compilationVerifier IsNot Nothing Then
             compilationVerifier(compilation)
         End If
-
 
         Return CompileAndVerify(compilation, expectedOutput:=expectedOutput)
     End Function
@@ -909,7 +920,6 @@ Public MustInherit Class BasicTestBase
         Dim compilation = CreateEmptyCompilation({syntaxTree}, references:=references, options:=If(compilationOptions, TestOptions.ReleaseDll))
         VerifyFlowGraphAndDiagnosticsForTest(Of TSyntaxNode)(compilation, expectedFlowGraph, expectedDiagnostics, which)
     End Sub
-
 
     Public Shared Function GetAssertTheseDiagnosticsString(allDiagnostics As ImmutableArray(Of Diagnostic), suppressInfos As Boolean) As String
         Return DumpAllDiagnostics(allDiagnostics, suppressInfos)

@@ -6,7 +6,6 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
-using Microsoft.CodeAnalysis.Editor.Shared.Utilities;
 using Roslyn.Utilities;
 
 namespace Microsoft.CodeAnalysis.Test.Utilities
@@ -82,7 +81,7 @@ namespace Microsoft.CodeAnalysis.Test.Utilities
                 get;
             }
 
-            private void MainThreadStart() => throw ExceptionUtilities.Unreachable;
+            private void MainThreadStart() => throw ExceptionUtilities.Unreachable();
 
             /// <summary>
             /// Verifies that the current synchronization context has not been used for scheduling work. If the
@@ -143,7 +142,7 @@ namespace Microsoft.CodeAnalysis.Test.Utilities
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             private static void ThrowFailedTransferExceptionForCapture()
-                => throw new InvalidOperationException($"Code cannot switch to the main thread without configuring the {nameof(IThreadingContext)}.");
+                => throw new InvalidOperationException($"Code cannot switch to the main thread without configuring IThreadingContext.");
         }
     }
 }

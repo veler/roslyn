@@ -7,60 +7,45 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.AddImport;
 using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CodeCleanup;
 using Microsoft.CodeAnalysis.CodeGeneration;
-using Microsoft.CodeAnalysis.CodeStyle;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Host;
+using Microsoft.CodeAnalysis.Simplification;
 
 namespace Microsoft.CodeAnalysis.ExtractMethod;
 
+/// <summary>
+/// All options needed to perform method extraction.
+/// </summary>
 [DataContract]
-internal readonly record struct ExtractMethodOptions
+internal readonly record struct ExtractMethodGenerationOptions
 {
-    [DataMember] public bool DontPutOutOrRefOnStruct { get; init; } = true;
+    [DataMember] public required CodeGenerationOptions CodeGenerationOptions { get; init; }
+    [DataMember] public required CodeCleanupOptions CodeCleanupOptions { get; init; }
 
-    public ExtractMethodOptions()
+    public static ExtractMethodGenerationOptions GetDefault(LanguageServices languageServices)
+        => new()
+        {
+            CodeGenerationOptions = CodeGenerationOptionsProviders.GetDefault(languageServices),
+            CodeCleanupOptions = CodeCleanupOptionsProviders.GetDefault(languageServices),
+        };
+
+    public ExtractMethodGenerationOptions()
     {
     }
 
-    public static readonly ExtractMethodOptions Default = new();
-}
-
-/// <summary>
-/// All options needed to perform method extraction.
-/// Combines global <see cref="ExtractOptions"/> with document specific code generation options.
-/// </summary>
-[DataContract]
-internal readonly record struct ExtractMethodGenerationOptions(
-    [property: DataMember] CodeGenerationOptions CodeGenerationOptions)
-{
-    [DataMember] public ExtractMethodOptions ExtractOptions { get; init; } = ExtractMethodOptions.Default;
-    [DataMember] public AddImportPlacementOptions AddImportOptions { get; init; } = AddImportPlacementOptions.Default;
-    [DataMember] public LineFormattingOptions LineFormattingOptions { get; init; } = LineFormattingOptions.Default;
-
-    public static ExtractMethodGenerationOptions GetDefault(HostLanguageServices languageServices)
-        => new(CodeGenerationOptions.GetDefault(languageServices));
+    public AddImportPlacementOptions AddImportOptions => CodeCleanupOptions.AddImportOptions;
+    public LineFormattingOptions LineFormattingOptions => CodeCleanupOptions.FormattingOptions.LineFormatting;
+    public SimplifierOptions SimplifierOptions => CodeCleanupOptions.SimplifierOptions;
 }
 
 internal static class ExtractMethodGenerationOptionsProviders
 {
-    public static async ValueTask<ExtractMethodGenerationOptions> GetExtractMethodGenerationOptionsAsync(this Document document, ExtractMethodGenerationOptions? fallbackOptions, CancellationToken cancellationToken)
-    {
-        fallbackOptions ??= ExtractMethodGenerationOptions.GetDefault(document.Project.LanguageServices);
-
-        var extractOptions = fallbackOptions.Value.ExtractOptions;
-        var codeGenerationOptions = await document.GetCodeGenerationOptionsAsync(fallbackOptions.Value.CodeGenerationOptions, cancellationToken).ConfigureAwait(false);
-        var addImportOptions = await document.GetAddImportPlacementOptionsAsync(fallbackOptions.Value.AddImportOptions, cancellationToken).ConfigureAwait(false);
-        var lineFormattingOptions = await document.GetLineFormattingOptionsAsync(fallbackOptions.Value.LineFormattingOptions, cancellationToken).ConfigureAwait(false);
-
-        return new ExtractMethodGenerationOptions(codeGenerationOptions)
+    public static async ValueTask<ExtractMethodGenerationOptions> GetExtractMethodGenerationOptionsAsync(this Document document, CancellationToken cancellationToken)
+        => new()
         {
-            ExtractOptions = extractOptions,
-            AddImportOptions = addImportOptions,
-            LineFormattingOptions = lineFormattingOptions,
+            CodeGenerationOptions = await document.GetCodeGenerationOptionsAsync(cancellationToken).ConfigureAwait(false),
+            CodeCleanupOptions = await document.GetCodeCleanupOptionsAsync(cancellationToken).ConfigureAwait(false),
         };
-    }
-
-    public static ValueTask<ExtractMethodGenerationOptions> GetExtractMethodGenerationOptionsAsync(this Document document, CodeActionOptionsProvider fallbackOptions, CancellationToken cancellationToken)
-        => document.GetExtractMethodGenerationOptionsAsync(fallbackOptions.GetExtractMethodGenerationOptions(document.Project.LanguageServices), cancellationToken);
 }

@@ -10,9 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.Editor.UnitTests;
 using Microsoft.CodeAnalysis.Editor.UnitTests.CodeActions;
-using Microsoft.CodeAnalysis.Editor.UnitTests.Workspaces;
-using Microsoft.CodeAnalysis.LanguageServices;
-using Microsoft.CodeAnalysis.Options;
+using Microsoft.CodeAnalysis.LanguageService;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.VisualStudio.Composition;
 using Roslyn.Test.Utilities;
@@ -44,8 +42,6 @@ namespace Microsoft.CodeAnalysis.Test.Utilities.Completion
 
         protected abstract (SyntaxNode argumentList, ImmutableArray<SyntaxNode> arguments) GetArgumentList(SyntaxToken token);
 
-        protected virtual OptionSet WithChangedOptions(OptionSet options) => options;
-
         private protected async Task VerifyDefaultValueAsync(
             string markup,
             string? expectedDefaultValue,
@@ -54,18 +50,11 @@ namespace Microsoft.CodeAnalysis.Test.Utilities.Completion
         {
             using var workspaceFixture = GetOrCreateWorkspaceFixture();
 
-            var workspace = workspaceFixture.Target.GetWorkspace(markup, ExportProvider);
+            var workspace = workspaceFixture.Target.GetWorkspace(markup, GetComposition());
             var code = workspaceFixture.Target.Code;
             var position = workspaceFixture.Target.Position;
 
-            var changedOptions = WithChangedOptions(workspace.Options);
-            if (options is not null)
-            {
-                foreach (var option in options)
-                    changedOptions = changedOptions.WithChangedOption(option.Key, option.Value);
-            }
-
-            workspace.SetOptions(changedOptions);
+            options?.SetGlobalOptions(workspace.GlobalOptions);
 
             var document = workspaceFixture.Target.UpdateDocument(code, SourceCodeKind.Regular);
 

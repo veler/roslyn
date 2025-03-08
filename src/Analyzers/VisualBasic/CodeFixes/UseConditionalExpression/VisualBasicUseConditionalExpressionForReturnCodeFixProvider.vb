@@ -7,11 +7,11 @@ Imports System.Diagnostics.CodeAnalysis
 Imports Microsoft.CodeAnalysis.CodeFixes
 Imports Microsoft.CodeAnalysis.Formatting
 Imports Microsoft.CodeAnalysis.Formatting.Rules
-Imports Microsoft.CodeAnalysis.LanguageServices
+Imports Microsoft.CodeAnalysis.LanguageService
 Imports Microsoft.CodeAnalysis.Operations
 Imports Microsoft.CodeAnalysis.UseConditionalExpression
 Imports Microsoft.CodeAnalysis.VisualBasic.Formatting
-Imports Microsoft.CodeAnalysis.VisualBasic.LanguageServices
+Imports Microsoft.CodeAnalysis.VisualBasic.LanguageService
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 
 Namespace Microsoft.CodeAnalysis.VisualBasic.UseConditionalExpression
@@ -40,8 +40,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.UseConditionalExpression
             Return statement
         End Function
 
-        Protected Overrides Function GetSyntaxFormatting() As ISyntaxFormatting
-            Return VisualBasicSyntaxFormatting.Instance
-        End Function
+        Protected Overrides ReadOnly Property SyntaxFormatting As ISyntaxFormatting = VisualBasicSyntaxFormatting.Instance
     End Class
 End Namespace

@@ -92,7 +92,7 @@ Namespace Microsoft.CodeAnalysis.Operations
             Dim isImplicit As Boolean = boundAssignment.WasCompilerGenerated
 
             Return New CompoundAssignmentOperation(inConversion, outConversion, operatorInfo.OperatorKind, operatorInfo.IsLifted,
-                                                   operatorInfo.IsChecked, operatorInfo.OperatorMethod, target, value,
+                                                   operatorInfo.IsChecked, operatorInfo.OperatorMethod, constrainedToType:=Nothing, target, value,
                                                    _semanticModel, syntax, type, isImplicit)
         End Function
 
@@ -183,6 +183,9 @@ Namespace Microsoft.CodeAnalysis.Operations
                 Case BoundKind.RaiseEventStatement
                     Dim boundRaiseEvent = DirectCast(boundNode, BoundRaiseEventStatement)
                     Return DeriveArguments(DirectCast(boundRaiseEvent.EventInvocation, BoundCall))
+                Case BoundKind.Attribute
+                    Dim boundAttribute = DirectCast(boundNode, BoundAttribute)
+                    Return DeriveArguments(boundAttribute.ConstructorArguments, boundAttribute.Constructor.Parameters, boundAttribute.ConstructorDefaultArguments)
                 Case Else
                     Throw ExceptionUtilities.UnexpectedValue(boundNode.Kind)
             End Select
@@ -314,6 +317,7 @@ Namespace Microsoft.CodeAnalysis.Operations
             Dim builder = ArrayBuilder(Of IOperation).GetInstance(expression.Arguments.Length)
             Dim currentDeclarationIndex = 0
             For i As Integer = 0 To expression.Arguments.Length - 1
+                Dim [property] As IPropertySymbol = properties(i)
                 Dim value As IOperation = Create(expression.Arguments(i))
 
                 Dim target As IOperation
@@ -323,10 +327,9 @@ Namespace Microsoft.CodeAnalysis.Operations
                 If currentDeclarationIndex >= expression.Declarations.Length OrElse
                    i <> expression.Declarations(currentDeclarationIndex).PropertyIndex Then
                     ' No matching declaration, synthesize a property reference with an implicit receiver to be assigned.
-                    Dim [property] As IPropertySymbol = properties(i)
                     Dim instance As IInstanceReferenceOperation = CreateAnonymousTypePropertyAccessImplicitReceiverOperation([property], expression.Syntax)
                     target = New PropertyReferenceOperation(
-                        [property],
+                        [property], constrainedToType:=Nothing,
                         ImmutableArray(Of IArgumentOperation).Empty,
                         instance,
                         _semanticModel,
@@ -336,7 +339,7 @@ Namespace Microsoft.CodeAnalysis.Operations
                     isImplicitAssignment = True
                 Else
                     Debug.Assert(i = expression.Declarations(currentDeclarationIndex).PropertyIndex)
-                    target = CreateBoundAnonymousTypePropertyAccessOperation(expression.Declarations(currentDeclarationIndex))
+                    target = CreateBoundAnonymousTypePropertyAccessOperation(expression.Declarations(currentDeclarationIndex), [property])
                     currentDeclarationIndex = currentDeclarationIndex + 1
                     isImplicitAssignment = expression.WasCompilerGenerated
                 End If

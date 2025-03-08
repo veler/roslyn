@@ -217,7 +217,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal override IEnumerable<Cci.SecurityAttribute> GetSecurityInformation()
         {
-            throw ExceptionUtilities.Unreachable;
+            throw ExceptionUtilities.Unreachable();
         }
 
         internal override bool IsMetadataNewSlot(bool ignoreInterfaceImplementationChanges = false)
@@ -225,7 +225,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return false;
         }
 
-        internal override bool IsMetadataVirtual(bool ignoreInterfaceImplementationChanges = false)
+        internal override bool IsMetadataVirtual(IsMetadataVirtualOption option = IsMetadataVirtualOption.None)
         {
             return false;
         }
@@ -276,6 +276,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             returnType = taskT.Construct(resultType);
         }
 
-        protected sealed override bool HasSetsRequiredMembersImpl => throw ExceptionUtilities.Unreachable;
+        protected sealed override bool HasSetsRequiredMembersImpl => throw ExceptionUtilities.Unreachable();
     }
 }

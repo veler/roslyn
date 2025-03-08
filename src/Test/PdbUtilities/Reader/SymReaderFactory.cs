@@ -35,7 +35,6 @@ namespace Roslyn.Test.PdbUtilities
         [DllImport("Microsoft.DiaSymReader.Native.arm64.dll", EntryPoint = "CreateSymReader")]
         private static extern void CreateSymReaderArm64(ref Guid id, [MarshalAs(UnmanagedType.IUnknown)] out object symReader);
 
-
         private static ISymUnmanagedReader5 CreateNativeSymReader(Stream pdbStream, object metadataImporter)
         {
             object symReader = null;
@@ -73,7 +72,7 @@ namespace Roslyn.Test.PdbUtilities
 
         public static ISymUnmanagedReader5 CreateReader(ImmutableArray<byte> pdbImage, ImmutableArray<byte> peImageOpt = default(ImmutableArray<byte>))
         {
-            return CreateReader(new MemoryStream(pdbImage.ToArray()), (peImageOpt.IsDefault) ? null : new PEReader(peImageOpt));
+            return CreateReader(new MemoryStream([.. pdbImage]), (peImageOpt.IsDefault) ? null : new PEReader(peImageOpt));
         }
 
         public static ISymUnmanagedReader5 CreateReader(Stream pdbStream, Stream peStreamOpt = null)

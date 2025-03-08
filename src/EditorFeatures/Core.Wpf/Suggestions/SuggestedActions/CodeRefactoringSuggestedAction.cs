@@ -24,11 +24,12 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.Suggestions
             IThreadingContext threadingContext,
             SuggestedActionsSourceProvider sourceProvider,
             Workspace workspace,
+            TextDocument originalDocument,
             ITextBuffer subjectBuffer,
             CodeRefactoringProvider provider,
             CodeAction codeAction,
             SuggestedActionSet fixAllFlavors)
-            : base(threadingContext, sourceProvider, workspace, subjectBuffer, provider, codeAction, fixAllFlavors)
+            : base(threadingContext, sourceProvider, workspace, originalDocument, subjectBuffer, provider, codeAction, fixAllFlavors)
         {
             CodeRefactoringProvider = provider;
         }

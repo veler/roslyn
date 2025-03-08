@@ -6,37 +6,35 @@
 
 using System;
 using System.Diagnostics;
-using System.Text;
 
 namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 {
-    using Microsoft.CodeAnalysis.PooledObjects;
     using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 
-    internal class DirectiveParser : SyntaxParser
+    internal sealed class DirectiveParser : SyntaxParser
     {
         private const int MAX_DIRECTIVE_IDENTIFIER_WIDTH = 128;
 
-        private readonly DirectiveStack _context;
+        private DirectiveStack _context;
 
-        internal DirectiveParser(Lexer lexer, DirectiveStack context)
-            : base(lexer, LexerMode.Directive, null, null, false)
+        internal DirectiveParser(Lexer lexer)
+            : base(lexer, LexerMode.Directive, oldTree: null, changes: null, allowModeReset: false)
         {
+        }
+
+        public void ReInitialize(DirectiveStack context)
+        {
+            base.ReInitialize();
             _context = context;
         }
 
         public CSharpSyntaxNode ParseDirective(
             bool isActive,
             bool endIsActive,
-            bool isAfterFirstTokenInFile,
-            bool isAfterNonWhitespaceOnLine)
+            bool isFollowingToken)
         {
             var hashPosition = lexer.TextWindow.Position;
             var hash = this.EatToken(SyntaxKind.HashToken, false);
-            if (isAfterNonWhitespaceOnLine)
-            {
-                hash = this.AddError(hash, ErrorCode.ERR_BadDirectivePlacement);
-            }
 
             // The behavior of these directives when isActive is false is somewhat complicated.
             // The key functions in the native compiler are ScanPreprocessorIfSection and
@@ -78,7 +76,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 
                 case SyntaxKind.DefineKeyword:
                 case SyntaxKind.UndefKeyword:
-                    result = this.ParseDefineOrUndefDirective(hash, this.EatContextualToken(contextualKind), isActive, isAfterFirstTokenInFile && !isAfterNonWhitespaceOnLine);
+                    result = this.ParseDefineOrUndefDirective(hash, this.EatContextualToken(contextualKind), isActive, isFollowingToken);
                     break;
 
                 case SyntaxKind.ErrorKeyword:
@@ -98,11 +96,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                     break;
 
                 case SyntaxKind.ReferenceKeyword:
-                    result = this.ParseReferenceDirective(hash, this.EatContextualToken(contextualKind), isActive, isAfterFirstTokenInFile && !isAfterNonWhitespaceOnLine);
+                    result = this.ParseReferenceDirective(hash, this.EatContextualToken(contextualKind), isActive, isFollowingToken);
                     break;
 
                 case SyntaxKind.LoadKeyword:
-                    result = this.ParseLoadDirective(hash, this.EatContextualToken(contextualKind), isActive, isAfterFirstTokenInFile && !isAfterNonWhitespaceOnLine);
+                    result = this.ParseLoadDirective(hash, this.EatContextualToken(contextualKind), isActive, isFollowingToken);
                     break;
 
                 case SyntaxKind.NullableKeyword:
@@ -118,16 +116,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                     {
                         var id = this.EatToken(SyntaxKind.IdentifierToken, false);
                         var end = this.ParseEndOfDirective(ignoreErrors: true);
-                        if (!isAfterNonWhitespaceOnLine)
+                        if (!id.IsMissing)
                         {
-                            if (!id.IsMissing)
-                            {
-                                id = this.AddError(id, ErrorCode.ERR_PPDirectiveExpected);
-                            }
-                            else
-                            {
-                                hash = this.AddError(hash, ErrorCode.ERR_PPDirectiveExpected);
-                            }
+                            id = this.AddError(id, ErrorCode.ERR_PPDirectiveExpected);
+                        }
+                        else
+                        {
+                            hash = this.AddError(hash, ErrorCode.ERR_PPDirectiveExpected);
                         }
 
                         result = SyntaxFactory.BadDirectiveTrivia(hash, id, end, isActive);
@@ -407,13 +402,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             Debug.Assert(CurrentToken.Kind == SyntaxKind.OpenParenToken);
 
-            if (isActive)
-            {
-                lineKeyword = CheckFeatureAvailability(lineKeyword, MessageID.IDS_FeatureLineSpanDirective);
-            }
-
             bool reportError = isActive;
             var start = ParseLineDirectivePosition(ref reportError, out int startLine, out int startCharacter);
+            if (noTriviaBetween(lineKeyword, start.GetFirstToken()))
+            {
+                start = this.AddError(start, ErrorCode.ERR_LineSpanDirectiveRequiresSpace);
+            }
 
             var minus = EatToken(SyntaxKind.MinusToken, reportError: reportError);
             if (minus.IsMissing) reportError = false;
@@ -429,11 +423,28 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 ParseLineDirectiveNumericLiteral(ref reportError, minValue: 1, maxValue: MaxCharacterValue, out _) :
                 null;
 
+            if (noTriviaBetween(end.GetLastToken(), characterOffset))
+            {
+                characterOffset = this.AddError(characterOffset, ErrorCode.ERR_LineSpanDirectiveRequiresSpace);
+            }
+
             var file = EatToken(SyntaxKind.StringLiteralToken, ErrorCode.ERR_MissingPPFile, reportError: reportError);
             if (file.IsMissing) reportError = false;
 
+            if (noTriviaBetween(characterOffset ?? end.GetLastToken(), file))
+            {
+                file = this.AddError(file, ErrorCode.ERR_LineSpanDirectiveRequiresSpace);
+            }
+
             var endOfDirective = this.ParseEndOfDirective(ignoreErrors: !reportError);
             return SyntaxFactory.LineSpanDirectiveTrivia(hash, lineKeyword, start, minus, end, characterOffset, file, endOfDirective, isActive);
+
+            static bool noTriviaBetween(SyntaxToken token1, SyntaxToken token2)
+            {
+                return token1 is { IsMissing: false }
+                    && token2 is { IsMissing: false }
+                    && LanguageParser.NoTriviaBetween(token1, token2);
+            }
         }
 
         private LineDirectivePositionSyntax ParseLineDirectivePosition(ref bool reportError, out int line, out int character)

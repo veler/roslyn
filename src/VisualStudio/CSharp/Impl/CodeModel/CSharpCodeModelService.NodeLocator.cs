@@ -13,7 +13,6 @@ using Microsoft.CodeAnalysis.CSharp.Extensions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editor.Shared.Utilities;
 using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.LanguageServices.Implementation.Utilities;
@@ -161,7 +160,7 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.CodeModel
                 // to the next token. This accounts for the fact that comments were included in the token
                 // stream in Dev10.
                 var significantTrivia = openBrace.GetAllTrailingTrivia()
-                                                 .Where(t => !t.MatchesKind(SyntaxKind.WhitespaceTrivia, SyntaxKind.EndOfLineTrivia))
+                                                 .Where(t => t is not SyntaxTrivia(SyntaxKind.WhitespaceTrivia or SyntaxKind.EndOfLineTrivia))
                                                  .FirstOrDefault();
 
                 if (significantTrivia.Kind() != SyntaxKind.None)

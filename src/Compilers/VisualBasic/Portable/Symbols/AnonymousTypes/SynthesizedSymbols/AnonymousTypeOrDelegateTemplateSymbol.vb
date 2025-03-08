@@ -161,6 +161,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
                 End Get
             End Property
 
+            Friend Overrides ReadOnly Property HasCompilerLoweringPreserveAttribute As Boolean
+                Get
+                    Return False
+                End Get
+            End Property
+
             Friend Overrides ReadOnly Property IsExtensibleInterfaceNoUseSiteDiagnostics As Boolean
                 Get
                     Return False
@@ -379,6 +385,17 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
 
             Friend NotOverridable Overrides Function GetSynthesizedWithEventsOverrides() As IEnumerable(Of PropertySymbol)
                 Return SpecializedCollections.EmptyEnumerable(Of PropertySymbol)()
+            End Function
+
+            Friend NotOverridable Overrides ReadOnly Property HasAnyDeclaredRequiredMembers As Boolean
+                Get
+                    Return False
+                End Get
+            End Property
+
+            Friend Overrides Function GetGuidString(ByRef guidString As String) As Boolean
+                guidString = Nothing
+                Return False
             End Function
         End Class
 

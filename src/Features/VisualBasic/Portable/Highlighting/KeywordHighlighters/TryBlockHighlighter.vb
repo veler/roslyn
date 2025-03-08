@@ -54,7 +54,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.KeywordHighlighting
             End With
         End Sub
 
-        Private Sub HighlightRelatedStatements(node As SyntaxNode, highlights As List(Of TextSpan))
+        Private Shared Sub HighlightRelatedStatements(node As SyntaxNode, highlights As List(Of TextSpan))
             If node.Kind = SyntaxKind.ExitTryStatement Then
                 highlights.Add(node.Span)
             Else
@@ -64,7 +64,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.KeywordHighlighting
                     End If
 
                     Dim child = childNodeOrToken.AsNode()
-                    If Not TypeOf child Is TryBlockSyntax AndAlso Not TypeOf child Is LambdaExpressionSyntax Then
+                    If TypeOf child IsNot TryBlockSyntax AndAlso TypeOf child IsNot LambdaExpressionSyntax Then
                         HighlightRelatedStatements(child, highlights)
                     End If
                 Next

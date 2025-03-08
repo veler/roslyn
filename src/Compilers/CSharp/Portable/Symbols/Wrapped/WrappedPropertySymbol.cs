@@ -163,6 +163,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override bool IsRequired => _underlyingProperty.IsRequired;
 
+        internal sealed override bool HasUnscopedRefAttribute => _underlyingProperty.HasUnscopedRefAttribute;
+
         internal override ObsoleteAttributeData ObsoleteAttributeData
         {
             get
@@ -186,5 +188,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return _underlyingProperty.HasRuntimeSpecialName;
             }
         }
+
+        internal override int TryGetOverloadResolutionPriority() => _underlyingProperty.OverloadResolutionPriority;
     }
 }

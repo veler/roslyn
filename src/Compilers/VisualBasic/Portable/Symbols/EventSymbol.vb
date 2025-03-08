@@ -22,7 +22,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
         Inherits Symbol
         Implements IEventSymbol
 
-
         ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ' Changes to the public interface of this class should remain synchronized with the C# version.
         ' Do not make any changes to the public interface without making the corresponding change
@@ -321,6 +320,27 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Symbols
         Private ReadOnly Property IEventSymbol_ExplicitInterfaceImplementations As ImmutableArray(Of IEventSymbol) Implements IEventSymbol.ExplicitInterfaceImplementations
             Get
                 Return StaticCast(Of IEventSymbol).From(Me.ExplicitInterfaceImplementations)
+            End Get
+        End Property
+
+        Private ReadOnly Property IEventSymbol_PartialDefinitionPart As IEventSymbol Implements IEventSymbol.PartialDefinitionPart
+            Get
+                ' Feature not supported in VB
+                Return Nothing
+            End Get
+        End Property
+
+        Private ReadOnly Property IEventSymbol_PartialImplementationPart As IEventSymbol Implements IEventSymbol.PartialImplementationPart
+            Get
+                ' Feature not supported in VB
+                Return Nothing
+            End Get
+        End Property
+
+        Private ReadOnly Property IEventSymbol_IsPartialDefinition As Boolean Implements IEventSymbol.IsPartialDefinition
+            Get
+                ' Feature not supported in VB
+                Return False
             End Get
         End Property
 

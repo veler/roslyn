@@ -147,8 +147,7 @@ static class E
     public static void Target(this C that) { Console.WriteLine(""FAIL""); }
 }
 ";
-        // ILVerify: Unrecognized arguments for delegate .ctor. { Offset = 14 }
-        var verifier = CompileAndVerify(source, expectedOutput: PASS, symbolValidator: VerifyNoCacheContainersIn("C"), verify: Verification.FailsILVerify);
+        var verifier = CompileAndVerify(source, expectedOutput: PASS, symbolValidator: VerifyNoCacheContainersIn("C"));
         verifier.VerifyIL("C.Main", @"
 {
   // Code size       37 (0x25)
@@ -190,8 +189,7 @@ static class E
     public static void Target(this C that) { Console.WriteLine(""FAIL""); }
 }
 ";
-        // ILVerify: Unrecognized arguments for delegate .ctor. { Offset = 14 }
-        var verifier = CompileAndVerify(source, expectedOutput: PASS, symbolValidator: VerifyNoCacheContainersIn("C"), verify: Verification.FailsILVerify);
+        var verifier = CompileAndVerify(source, expectedOutput: PASS, symbolValidator: VerifyNoCacheContainersIn("C"));
         verifier.VerifyIL("C.Main", @"
 {
   // Code size       37 (0x25)
@@ -5620,7 +5618,7 @@ class C
         return 0;
     }
 }";
-        var comp = CompileAndVerify(source, parseOptions: TestOptions.RegularNext);
+        var comp = CompileAndVerify(source, parseOptions: TestOptions.Regular11);
         comp.VerifyDiagnostics();
         comp.VerifyIL("C.Main", @"
 {
@@ -5703,7 +5701,7 @@ class D
     }
 }
 ";
-        var verifier = CompileAndVerifyWithWinRt(source, parseOptions: TestOptions.RegularNext, options: TestOptions.ReleaseWinMD);
+        var verifier = CompileAndVerifyWithWinRt(source, parseOptions: TestOptions.Regular11, options: TestOptions.ReleaseWinMD);
 
         verifier.VerifyIL("D.InstanceAdd", @"
 {
@@ -5820,7 +5818,7 @@ class C
     }
 }
 ";
-        var verifier = CompileAndVerifyWithWinRt(source, parseOptions: TestOptions.RegularNext, options: TestOptions.ReleaseWinMD);
+        var verifier = CompileAndVerifyWithWinRt(source, parseOptions: TestOptions.Regular11, options: TestOptions.ReleaseWinMD);
 
         verifier.VerifyIL("C.InstanceAssign", @"
 {
@@ -5901,7 +5899,7 @@ partial class Test
 }
 ";
 
-        CompileAndVerify(text, parseOptions: TestOptions.RegularNext, expectedOutput: PASS).VerifyIL("Test.Main", @"
+        CompileAndVerify(text, parseOptions: TestOptions.Regular11, expectedOutput: PASS).VerifyIL("Test.Main", @"
 {
   // Code size       64 (0x40)
   .maxstack  2
@@ -5960,7 +5958,7 @@ public class C
     }
     static void TestMethod() => Console.WriteLine(""In TestMethod"");
 }
-", parseOptions: TestOptions.RegularNext, expectedOutput: @"
+", parseOptions: TestOptions.Regular11, expectedOutput: @"
 In TestMethod
 In TestMethod
 ").VerifyIL("C.Main()", @"
@@ -6025,7 +6023,7 @@ class Program
     static void Report(Delegate d) => Console.WriteLine($""{d.GetType().Namespace}.{d.GetType().Name}"");
 }";
 
-        var comp = CreateCompilation(source, parseOptions: TestOptions.RegularNext, options: TestOptions.DebugExe);
+        var comp = CreateCompilation(source, parseOptions: TestOptions.Regular11, options: TestOptions.DebugExe);
         comp.VerifyDiagnostics();
 
         var verifier = CompileAndVerify(comp, expectedOutput:
@@ -6349,6 +6347,47 @@ class Test
   IL_0029:  ret
 }
 ");
+    }
+
+    [Fact]
+    public void CompilerLoweringPreserveAttribute_01()
+    {
+        string source1 = @"
+using System;
+using System.Runtime.CompilerServices;
+
+[CompilerLoweringPreserve]
+[AttributeUsage(AttributeTargets.GenericParameter)]
+public class Preserve1Attribute : Attribute { }
+
+[AttributeUsage(AttributeTargets.GenericParameter)]
+public class Preserve2Attribute : Attribute { }
+";
+
+        string source2 = @"
+class Test1
+{
+    System.Action M2<[Preserve1][Preserve2]T>()
+    {
+        return (System.Action)D.Target<T>;
+    }
+}
+
+class D
+{
+    public static void Target<B>() { }
+}
+
+";
+        var comp1 = CreateCompilation([source1, source2, CompilerLoweringPreserveAttributeDefinition]);
+        CompileAndVerify(comp1, symbolValidator: validate).VerifyDiagnostics();
+
+        static void validate(ModuleSymbol m)
+        {
+            AssertEx.SequenceEqual(
+                ["Preserve1Attribute"],
+                m.GlobalNamespace.GetMember<NamedTypeSymbol>("Test1.<M2>O__0_0").TypeParameters.Single().GetAttributes().Select(a => a.ToString()));
+        }
     }
 
     private static Action<ModuleSymbol> VerifyCacheContainer(string typeName, int arity, params string[] expectedFields)

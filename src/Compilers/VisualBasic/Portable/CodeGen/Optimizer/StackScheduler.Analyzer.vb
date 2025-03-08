@@ -228,7 +228,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeGen
                 Return result
             End Function
 
-
             ''' <summary>
             ''' here we have a case of indirect assignment:  *t1 = expr;
             ''' normally we would need to push t1 and that will cause spilling of t2
@@ -842,16 +841,14 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeGen
             End Function
 
             Public Overrides Function VisitLoweredConditionalAccess(node As BoundLoweredConditionalAccess) As BoundNode
-                If Not node.ReceiverOrCondition.Type.IsBooleanType() Then
-                    ' We may need to load a reference to the receiver, or may need to  
-                    ' reload it after the null check. This won't work well 
-                    ' with a stack local.
-                    EnsureOnlyEvalStack()
-                End If
+                ' We may need to load a reference to the receiver, or may need to  
+                ' reload it after the null check. This won't work well 
+                ' with a stack local.
+                EnsureOnlyEvalStack()
 
                 Dim origStack = StackDepth()
 
-                Dim receiverOrCondition = DirectCast(Me.Visit(node.ReceiverOrCondition), BoundExpression)
+                Dim receiver = DirectCast(Me.Visit(node.Receiver), BoundExpression)
 
                 Dim cookie = GetStackStateCookie()     ' implicit branch here
 
@@ -871,7 +868,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeGen
                     EnsureStackState(cookie) ' implicit label here
                 End If
 
-                Return node.Update(receiverOrCondition, node.CaptureReceiver, node.PlaceholderId, whenNotNull, whenNull, node.Type)
+                Return node.Update(receiver, node.CaptureReceiver, node.PlaceholderId, whenNotNull, whenNull, node.Type)
             End Function
 
             Public Overrides Function VisitConditionalAccessReceiverPlaceholder(node As BoundConditionalAccessReceiverPlaceholder) As BoundNode
@@ -888,12 +885,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeGen
                 Dim cookie As Object = GetStackStateCookie() ' implicit goto here
 
                 Me.SetStackDepth(origStack) ' consequence is evaluated with original stack
-                Dim valueTypeReceiver = DirectCast(Me.Visit(node.ValueTypeReceiver), BoundExpression)
+                Dim valueTypeReceiver = DirectCast(Me.VisitExpression(node.ValueTypeReceiver, Me._context), BoundExpression)
 
                 EnsureStackState(cookie) ' implicit label here
 
                 Me.SetStackDepth(origStack) ' alternative is evaluated with original stack
-                Dim referenceTypeReceiver = DirectCast(Me.Visit(node.ReferenceTypeReceiver), BoundExpression)
+                Dim referenceTypeReceiver = DirectCast(Me.VisitExpression(node.ReferenceTypeReceiver, Me._context), BoundExpression)
 
                 EnsureStackState(cookie) ' implicit label here
 
@@ -924,7 +921,6 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeGen
 
                     binary = DirectCast(child, BoundBinaryOperator)
                 Loop
-
 
                 Dim prevStack As Integer = Me.StackDepth()
 
